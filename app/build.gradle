@@ -21,10 +21,13 @@ repositories {
     // Use JCenter for resolving dependencies.
     jcenter()
 }
-
+test {
+    useJUnitPlatform()
+}
 dependencies {
     // Use JUnit test framework.
-    testImplementation 'junit:junit:4.13'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:29.0-jre'
@@ -32,5 +35,5 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'mg.emit.App'
+    mainClass = 'mg.jaona.AppLauncher'
 }
