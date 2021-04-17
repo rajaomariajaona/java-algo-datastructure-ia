@@ -12,6 +12,20 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
         this.nullValue = nullValue;
     }
 
+    public AdjacencyMatrixGraph(AdjacencyMatrixGraph<T> graph) {
+        this.matrix = new HashMap<>();
+        var m = graph.getMatrix();
+        for (Vertex v : m.keySet()) {
+            matrix.put(v, new HashMap<>());
+        }
+        for (Vertex i : m.keySet()) {
+            for (Vertex j : m.get(i).keySet()) {
+                matrix.get(i).put(j, m.get(i).get(j));
+            }
+        }
+        this.nullValue = graph.getNullValue();
+    }
+
     public AdjacencyMatrixGraph() {
         matrix = new HashMap<>();
         this.nullValue = null;
@@ -129,10 +143,9 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
     }
 
     /**
-     * Null Value is the value if there is no edge between two vertex
      * It will change all value with old value to new one
      *
-     * @param nullValue
+     * @param nullValue is the value if there is no edge between two vertex
      */
     public void setNullValue(T nullValue) {
         T oldValue = this.nullValue;
