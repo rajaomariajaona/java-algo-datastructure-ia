@@ -43,9 +43,14 @@
         source: "2",
         target: "0",
         weight: 33
-    },];
+    },{
+        source: "2",
+        target: "2",
+        weight: 99
+    },
+    ];
 
-    run(n,l);
+    run(n, l);
 
     function run(nodes, links) {
         d3.select("svg").remove();
@@ -99,19 +104,9 @@
                 .attr("stroke", "#46aaab")
                 .attr("fill", "none")
                 .attr('marker-end', 'url(#arrowhead)')
-
-            edgepaths = svg.selectAll(".edgepath")
-                .data(links)
-                .enter()
-                .append('path')
-                .attr('class', 'edgepath')
-                .attr('fill-opacity', 1)
-                .attr('stroke-opacity', 1)
                 .attr('id', function (d, i) {
                     return 'edgepath' + i
                 })
-                .style("pointer-events", "none");
-
             edgelabels = svg.selectAll(".edgelabel")
                 .data(links)
                 .enter()
@@ -170,29 +165,54 @@
                         sx = d.source.x,
                         sy = d.source.y,
                         tx = d.target.x,
-                        ty = d.target.y;
-                    var ddx = ((dx / h)) * r,
-                        ddy = ((dy / h)) * r;
-                    sx += ddx;
-                    sy += ddy;
-                    tx -= ddx;
-                    ty -= ddy;
-                    return "M" +
-                        sx + "," +
-                        sy + "A" +
-                        h + "," + h + " 0 0,1 " +
-                        tx + "," +
-                        ty;
-                })
+                        ty = d.target.y,
+                        drx = h,
+                        dry = h,
+                        xRotation = 0, // degrees
+                        largeArc = 0, // 1 or 0
+                        sweep = 1; // 1 or 0
+
+                    // Self edge.
+                    if (sx === tx && sy === ty) {
+                        // Fiddle with this angle to get loop oriented.
+                        xRotation = -45;
+
+                        // Needs to be 1.
+                        largeArc = 1;
+
+                        // Change sweep to change orientation of loop.
+                        //sweep = 0;
+
+                        // Make drx and dry different to get an ellipse
+                        // instead of a circle.
+                        drx = 30;
+                        dry = 20;
+
+                        // For whatever reason the arc collapses to a point if the beginning
+                        // and ending points of the arc are the same, so kludge it.
+                        tx++;
+                        ty++;
+                        return "M" + sx + "," + sy + "A" + drx + "," + dry + " " + xRotation + "," + largeArc + "," + sweep + " " + tx + "," + ty;
+                    }else{
+                        var ddx = ((dx / h)) * r,
+                            ddy = ((dy / h)) * r;
+                        sx += ddx;
+                        sy += ddy;
+                        tx -= ddx;
+                        ty -= ddy;
+                        return "M" +
+                            sx + "," +
+                            sy + "A" +
+                            h + "," + h + " 0 0,1 " +
+                            tx + "," +
+                            ty;
+                    }
+                });
 
             node
                 .attr("transform", function (d) {
                     return "translate(" + d.x + ", " + d.y + ")";
                 });
-
-            edgepaths.attr('d', function (d) {
-                return 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y;
-            });
 
             edgelabels.attr('transform', function (d) {
                 if (d.target.x < d.source.x) {
