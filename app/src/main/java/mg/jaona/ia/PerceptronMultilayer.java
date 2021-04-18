@@ -9,11 +9,10 @@ import java.util.stream.Collectors;
 public class PerceptronMultilayer {
     private Structure structure;
     private AdjacencyMatrixGraph<Float> g;
-    private Integer nbPrototype;
     private List<Vertex> inputVertexes;
     private List<Vertex> hiddenVertexes;
     private Vertex outputVertexes;
-    private Float alpha = 0.001f;
+    private Float alpha = 0.1f;
 
     public PerceptronMultilayer(Structure structure) {
         this.structure = structure;
@@ -35,7 +34,7 @@ public class PerceptronMultilayer {
         g.addVertex(this.outputVertexes);
     }
 
-    public String generateNetworkVariableScript(){
+    public String generateNetworkVariableScript() {
         StringBuilder sb = new StringBuilder();
         StringBuilder sb2 = new StringBuilder();
         sb.append("var network = {nodes: [");
@@ -43,7 +42,7 @@ public class PerceptronMultilayer {
         for (int i = 0; i < this.inputVertexes.size(); i++) {
             sb.append("{id:'");
             sb.append(this.inputVertexes.get(i).getLabel());
-            sb.append( "',nr:");
+            sb.append("',nr:");
             sb.append(i + 1);
             sb.append(",layer: 1},");
             for (Vertex hiddenVertex : this.hiddenVertexes) {
@@ -53,9 +52,9 @@ public class PerceptronMultilayer {
                 sb2.append("', target: '");
                 sb2.append(hiddenVertex.getLabel());
                 sb2.append("', weight:'");
-                if(g.getNullValue() == null ? this.g.getValue(this.inputVertexes.get(i), hiddenVertex) == null : g.getNullValue().equals(this.g.getValue(this.inputVertexes.get(i), hiddenVertex))){
+                if (g.getNullValue() == null ? this.g.getValue(this.inputVertexes.get(i), hiddenVertex) == null : g.getNullValue().equals(this.g.getValue(this.inputVertexes.get(i), hiddenVertex))) {
                     sb2.append("0");
-                }else{
+                } else {
                     sb2.append(String.format("%.8f", this.g.getValue(this.inputVertexes.get(i), hiddenVertex)));
                 }
                 sb2.append("'},");
@@ -67,9 +66,9 @@ public class PerceptronMultilayer {
             sb2.append("', target: '");
             sb2.append(this.outputVertexes.getLabel());
             sb2.append("', weight:'");
-            if(g.getNullValue() == null ? this.g.getValue(hiddenVertex, this.outputVertexes) == null : g.getNullValue().equals(this.g.getValue( hiddenVertex, this.outputVertexes))){
+            if (g.getNullValue() == null ? this.g.getValue(hiddenVertex, this.outputVertexes) == null : g.getNullValue().equals(this.g.getValue(hiddenVertex, this.outputVertexes))) {
                 sb2.append("0");
-            }else{
+            } else {
                 sb2.append(String.format("%.8f", this.g.getValue(hiddenVertex, this.outputVertexes)));
             }
             sb2.append("'},");
@@ -83,7 +82,7 @@ public class PerceptronMultilayer {
         }
         sb.append("{id:'");
         sb.append(this.outputVertexes.getLabel());
-        sb.append( "',nr:");
+        sb.append("',nr:");
         sb.append(1);
         sb.append(",layer: 3},],");
         sb2.append("]");
@@ -92,18 +91,40 @@ public class PerceptronMultilayer {
         return sb.toString();
     }
 
-    public void fit(List<Float> partSerie, int epoch) {
-        while(epoch > 0){
-            Deque<Float> deque = new ArrayDeque<>(partSerie);
-            if (partSerie.size() < structure.nbInputLayer) {
+    public void fit(List<Float> serie, int epoch, float testRatio, NMSE.NMSECallback callback) {
+
+        if (testRatio >= 1 || testRatio < 0) {
+            throw new IllegalArgumentException("Test ration is not enough");
+        }
+        List<Float> testSerie = serie.stream().skip(Math.round(serie.size() * (1 - testRatio))).collect(Collectors.toList());
+        List<Float> fitSerie = serie.stream().limit(Math.round(serie.size() * (1 - testRatio))).collect(Collectors.toList());
+        while (epoch > 0) {
+            Deque<Float> deque = new ArrayDeque<>(fitSerie);
+            List<Float> expectedFit = new ArrayList<>();
+            List<Float> actualFit = new ArrayList<>();
+            List<Float> expectedTest = new ArrayList<>();
+            List<Float> actualTest = new ArrayList<>();
+            if (fitSerie.size() < structure.nbInputLayer) {
                 throw new IllegalArgumentException("Part Serie is not enough");
             }
             while (deque.size() > structure.nbInputLayer) {
                 List<Float> toPropagate = deque.stream().limit(structure.nbInputLayer + 1).collect(Collectors.toList());
                 Float expected = toPropagate.remove(structure.nbInputLayer);
-                propagateOneValue(toPropagate, expected);
+                Float actual = propagateOneValue(toPropagate, expected);
+                expectedFit.add(expected);
+                actualFit.add(actual);
                 deque.removeFirst();
             }
+            deque.addAll(testSerie);
+            while (deque.size() > structure.nbInputLayer) {
+                List<Float> toPropagate = deque.stream().limit(structure.nbInputLayer + 1).collect(Collectors.toList());
+                Float expected = toPropagate.remove(structure.nbInputLayer);
+                Float actual = forwardPropagation(toPropagate);
+                expectedTest.add(expected);
+                actualTest.add(actual);
+                deque.removeFirst();
+            }
+            callback.pass(NMSE.compute(expectedFit, actualFit, expectedTest, actualTest));
             epoch--;
         }
     }
@@ -137,18 +158,19 @@ public class PerceptronMultilayer {
         }
     }
 
-    public boolean isWeightInitialized(){
-        if(g.getNullValue() == null){
+    public boolean isWeightInitialized() {
+        if (g.getNullValue() == null) {
             return this.g.getValue(inputVertexes.get(random(inputVertexes.size())), hiddenVertexes.get(random(hiddenVertexes.size()))) != null;
-        }else{
+        } else {
             return !this.g.getNullValue().equals(this.g.getValue(inputVertexes.get(random(inputVertexes.size())), hiddenVertexes.get(random(hiddenVertexes.size()))));
         }
     }
-    private int random(int max){
+
+    private int random(int max) {
         return Double.valueOf(Math.floor(Math.random() * max)).intValue();
     }
 
-    private Float forwardPropagation(List<Float> input) {
+    public Float forwardPropagation(List<Float> input) {
         Float out = 0f;
         if (input.size() != structure.getNbInputLayer()) {
             throw new IllegalArgumentException("Input and input Layer size is different");
@@ -164,16 +186,17 @@ public class PerceptronMultilayer {
                 Float valIn = inputValues.get(in);
                 for (Vertex hi : hiddenVertexes) {
                     if (middleValues.containsKey(hi)) {
-                        middleValues.replace(hi, middleValues.get(hi) + valIn);
+                        middleValues.replace(hi, middleValues.get(hi) + valIn * this.g.getValue(in, hi));
                     } else {
-                        middleValues.put(hi, valIn);
+                        middleValues.put(hi, valIn * this.g.getValue(in, hi));
                     }
                 }
 
             }
-            middleValues = middleValues.entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), SigmoidFunction.compute(entry.getValue()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            middleValues = middleValues.entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),
+                    SigmoidFunction.compute(entry.getValue()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             for (Vertex hi : hiddenVertexes) {
-                out += middleValues.get(hi);
+                out += middleValues.get(hi) * this.g.getValue(hi,this.outputVertexes);
             }
             out = SigmoidFunction.compute(out);
         }
@@ -196,16 +219,17 @@ public class PerceptronMultilayer {
                 Float valIn = inputValues.get(in);
                 for (Vertex hi : hiddenVertexes) {
                     if (middleValues.containsKey(hi)) {
-                        middleValues.replace(hi, middleValues.get(hi) + valIn);
+                        middleValues.replace(hi, middleValues.get(hi) + valIn * this.g.getValue(in, hi));
                     } else {
-                        middleValues.put(hi, valIn);
+                        middleValues.put(hi, valIn * this.g.getValue(in, hi));
                     }
                 }
 
             }
-            middleValues = middleValues.entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), SigmoidFunction.compute(entry.getValue()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            middleValues = middleValues.entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),
+                    SigmoidFunction.compute(entry.getValue()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             for (Vertex hi : hiddenVertexes) {
-                out += middleValues.get(hi);
+                out += middleValues.get(hi) * this.g.getValue(hi,this.outputVertexes);
             }
             out = SigmoidFunction.compute(out);
             AdjacencyMatrixGraph<Float> graph = new AdjacencyMatrixGraph(this.g);
@@ -223,11 +247,7 @@ public class PerceptronMultilayer {
                 }
             }
         }
-        return computeError(expected, out);
-    }
-
-    private Float computeError(Float expected, Float actual) {
-        return Double.valueOf(0.5 * Math.pow(actual - expected, 2)).floatValue();
+        return out;
     }
 
     public Float getAlpha() {

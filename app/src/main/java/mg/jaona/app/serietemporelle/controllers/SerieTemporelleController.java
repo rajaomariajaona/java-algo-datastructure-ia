@@ -7,6 +7,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -15,6 +17,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import mg.jaona.app.serietemporelle.SerieTemporelleUI;
+import mg.jaona.ia.NMSE;
 import mg.jaona.ia.PerceptronMultilayer;
 import mg.jaona.ia.SerieTemporelle;
 import mg.jaona.ia.Takens;
@@ -55,10 +58,17 @@ public class SerieTemporelleController implements Initializable {
     @FXML
     private CheckBox checkBoxWeight;
 
+    @FXML
+    private LineChart<String, Float> lineChartNMSE;
+
+    private XYChart.Series<String, Float> fitError = new XYChart.Series();
+    private XYChart.Series<String, Float> testError = new XYChart.Series();
+
     private PerceptronMultilayer pmc;
 
     private List<SerieTemporelle.DataSet> values;
     private boolean isLearning = false;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Map<TitledPane, AnchorPane> mapPaneTitled = Map.of(titledValues, paneValues, titledLearn, paneLearn, titledPredict, panePredict, titledStructure, paneStructure);
@@ -95,6 +105,11 @@ public class SerieTemporelleController implements Initializable {
         webviewStructure.setContextMenuEnabled(false);
         webviewStructure.getEngine().load(SerieTemporelleUI.class.getResource("visualize-network.html").toString());
         this.values = new ArrayList<>();
+        fitError.setName("Erreur d'apprentissage");
+        testError.setName("Erreur de test");
+
+        lineChartNMSE.getData().add(fitError);
+        lineChartNMSE.getData().add(testError);
     }
 
     @FXML
@@ -118,61 +133,81 @@ public class SerieTemporelleController implements Initializable {
             vector[i] = listVector.get(i);
         }
         Takens takens = new Takens(vector);
-        try{
+        try {
             int inputLayer = takens.firstLayerLength();
             txtNbLayerInput.setText(String.valueOf(inputLayer));
-            this.pmc = new PerceptronMultilayer(new PerceptronMultilayer.Structure(inputLayer,Integer.parseInt(inputNbHiddenLayer.getText())));
+            this.pmc = new PerceptronMultilayer(new PerceptronMultilayer.Structure(inputLayer, Integer.parseInt(inputNbHiddenLayer.getText())));
             redraw();
             btnInitWeight.setDisable(false);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void redraw(){
-        String s= pmc.generateNetworkVariableScript();
+    private void redraw() {
+        String s = pmc.generateNetworkVariableScript();
         System.out.println(s);
         webviewStructure.getEngine().executeScript(s);
         webviewStructure.getEngine().executeScript("draw(network)");
-        if(checkBoxWeight.isSelected()){
+        if (checkBoxWeight.isSelected()) {
             webviewStructure.getEngine().executeScript("showWeight()");
         }
     }
 
     @FXML
-    private void handleInitWeight(ActionEvent e){
+    private void handleInitWeight(ActionEvent e) {
         boolean isInited = pmc.isWeightInitialized();
-        if(pmc != null && !isInited){
+        if (pmc != null && !isInited) {
             pmc.initializeWeight();
             redraw();
-        }else if(isInited){
+        } else if (isInited) {
             Alert a = new Alert(Alert.AlertType.CONFIRMATION);
             a.setContentText("Les poids ont été déjà initialiser.\nVoulez vous vraiment le re-initialiser?");
             a.show();
             a.setOnCloseRequest(event -> {
-                if(a.getResult().equals(ButtonType.OK)){
+                if (a.getResult().equals(ButtonType.OK)) {
                     pmc.initializeWeight();
                     redraw();
                 }
             });
         }
     }
+    private static int c = 0;
     @FXML
-    private void handleLearn(ActionEvent e){
+    private void handleLearn(ActionEvent e) {
+        fitError.getData().clear();
+        testError.getData().clear();
+        SerieTemporelleController.c = 0;
+        pmc.setAlpha(0.1f);
+        pmc.fit(this.values.stream().map(SerieTemporelle.DataSet::getY).collect(Collectors.toList()),
+                Integer.parseInt(inputMaxEpoch.getText()), 0.2f, value -> {
+                    fitError
+                            .getData()
+                            .add(new XYChart.Data<>(Integer.valueOf(SerieTemporelleController.c).toString(), Double.valueOf(Math.random()).floatValue()));
+                    testError
+                            .getData()
+                            .add(new XYChart.Data<>(Integer.valueOf(SerieTemporelleController.c).toString(), Double.valueOf(Math.random()).floatValue()));
+                    SerieTemporelleController.c++;
+                });
+        redraw();
+    }
+
+    @FXML
+    private void handleStopLearn(ActionEvent e) {
 
     }
-    @FXML
-    private void handleStopLearn(ActionEvent e){
-
-    }
 
     @FXML
-    private void handleCheckBoxWeight(ActionEvent e){
-        if(checkBoxWeight.isSelected()){
+    private void handleCheckBoxWeight(ActionEvent e) {
+        if (checkBoxWeight.isSelected()) {
             webviewStructure.getEngine().executeScript("showWeight()");
-        }else{
+        } else {
             webviewStructure.getEngine().executeScript("hideWeight()");
         }
     }
 
+    @FXML
+    private void add(ActionEvent a) {
+
+    }
 }

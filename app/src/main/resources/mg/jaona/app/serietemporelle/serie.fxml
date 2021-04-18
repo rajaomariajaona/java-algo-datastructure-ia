@@ -93,7 +93,7 @@
                </children></AnchorPane>
             <AnchorPane fx:id="paneLearn" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;">
                <children>
-                  <LineChart layoutX="43.0" layoutY="99.0" title="Erreur Quadratique" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <LineChart fx:id="lineChartNMSE" layoutX="43.0" layoutY="99.0" title="Erreur Quadratique" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <xAxis>
                       <CategoryAxis side="BOTTOM" />
                     </xAxis>
@@ -102,6 +102,7 @@
                     </yAxis>
                   </LineChart>
                </children></AnchorPane>
+            <Button mnemonicParsing="false" onAction="#add" text="add" />
          </children>
       </StackPane>
    </center>
@@ -148,7 +149,7 @@
                               <VBox spacing="2.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
                                  <children>
                                     <Label text="Pas d'apprentissage" />
-                                    <TextField fx:id="inputAlpha" promptText="Alpha" text="0." />
+                                    <TextField fx:id="inputAlpha" promptText="Alpha" text="0.1" />
                                  </children>
                               </VBox>
                               <VBox layoutX="10.0" layoutY="10.0" spacing="2.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="70.0">
