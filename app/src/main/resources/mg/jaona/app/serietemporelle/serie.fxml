@@ -112,13 +112,8 @@
                                     <TextField fx:id="inputNbHiddenLayer" promptText="Nombre de couche caché" />
                                  </children>
                               </VBox>
-                              <VBox layoutX="25.399999618530273" layoutY="65.4000015258789" spacing="2.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="65.0">
-                                 <children>
-                                    <Label text="Decomposition Vecteurs" />
-                                    <TextField fx:id="inputVectorDecomp" promptText="Decomposition Vecteur" />
-                                 </children>
-                              </VBox>
-                              <Button fx:id="btnComputeStructure" disable="true" layoutX="33.0" layoutY="73.0" mnemonicParsing="false" onAction="#handleComputeStructure" text="Calculer l'architecture" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="120.0" />
+                              <VBox layoutX="25.399999618530273" layoutY="65.4000015258789" spacing="2.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="65.0" />
+                              <Button fx:id="btnComputeStructure" disable="true" layoutX="33.0" layoutY="73.0" mnemonicParsing="false" onAction="#handleComputeStructure" text="Calculer l'architecture" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="70.0" />
                            </children></AnchorPane>
                   </content>
                 </TitledPane>
