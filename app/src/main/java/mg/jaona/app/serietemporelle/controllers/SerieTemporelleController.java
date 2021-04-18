@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
 public class SerieTemporelleController implements Initializable {
 
     @FXML
-    private TextField inputValues, inputNbHiddenLayer;
+    private TextField inputValues, inputNbHiddenLayer, inputMaxEpoch, inputAlpha;
 
     @FXML
-    private Button btnComputeValues, btnComputeStructure;
+    private Button btnComputeValues, btnComputeStructure, btnLearn, btnInitWeight, btnStopLearn;
 
     @FXML
     private Accordion menuAccordion;
@@ -52,10 +52,13 @@ public class SerieTemporelleController implements Initializable {
     @FXML
     private WebView webviewStructure;
 
+    @FXML
+    private CheckBox checkBoxWeight;
+
     private PerceptronMultilayer pmc;
 
     private List<SerieTemporelle.DataSet> values;
-
+    private boolean isLearning = false;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Map<TitledPane, AnchorPane> mapPaneTitled = Map.of(titledValues, paneValues, titledLearn, paneLearn, titledPredict, panePredict, titledStructure, paneStructure);
@@ -73,6 +76,18 @@ public class SerieTemporelleController implements Initializable {
             btnComputeStructure.setDisable(inputNbHiddenLayer.getText().trim().equals(""));
         });
 
+        inputAlpha.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("[0-2]{0,1}([\\.]\\d{0,10})?")) {
+                inputAlpha.setText(oldValue);
+            }
+            btnLearn.setDisable(inputMaxEpoch.getText().trim().equals("") || inputAlpha.getText().trim().equals(""));
+        });
+        inputMaxEpoch.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("[0-9]{0,10}")) {
+                inputMaxEpoch.setText(oldValue);
+            }
+            btnLearn.setDisable(inputMaxEpoch.getText().trim().equals("") || inputAlpha.getText().trim().equals(""));
+        });
         menuAccordion.expandedPaneProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null)
                 mapPaneTitled.get(newValue).toFront();
@@ -96,6 +111,7 @@ public class SerieTemporelleController implements Initializable {
 
     @FXML
     private void handleComputeStructure(ActionEvent ae) {
+        menuAccordion.getPanes().forEach(titledPane -> titledPane.setDisable(!(titledPane.equals(titledStructure) || titledPane.equals(titledValues) || titledPane.equals(titledLearn))));
         List<Float> listVector = this.values.stream().map(SerieTemporelle.DataSet::getY).collect(Collectors.toList());
         float[] vector = new float[listVector.size()];
         for (int i = 0; i < listVector.size(); i++) {
@@ -106,13 +122,57 @@ public class SerieTemporelleController implements Initializable {
             int inputLayer = takens.firstLayerLength();
             txtNbLayerInput.setText(String.valueOf(inputLayer));
             this.pmc = new PerceptronMultilayer(new PerceptronMultilayer.Structure(inputLayer,Integer.parseInt(inputNbHiddenLayer.getText())));
-            System.out.println(pmc.generateNetworkVariableScript());
-            webviewStructure.getEngine().executeScript(pmc.generateNetworkVariableScript());
-            webviewStructure.getEngine().executeScript("draw(network)");
+            redraw();
+            btnInitWeight.setDisable(false);
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
+    private void redraw(){
+        String s= pmc.generateNetworkVariableScript();
+        System.out.println(s);
+        webviewStructure.getEngine().executeScript(s);
+        webviewStructure.getEngine().executeScript("draw(network)");
+        if(checkBoxWeight.isSelected()){
+            webviewStructure.getEngine().executeScript("showWeight()");
+        }
+    }
+
+    @FXML
+    private void handleInitWeight(ActionEvent e){
+        boolean isInited = pmc.isWeightInitialized();
+        if(pmc != null && !isInited){
+            pmc.initializeWeight();
+            redraw();
+        }else if(isInited){
+            Alert a = new Alert(Alert.AlertType.CONFIRMATION);
+            a.setContentText("Les poids ont été déjà initialiser.\nVoulez vous vraiment le re-initialiser?");
+            a.show();
+            a.setOnCloseRequest(event -> {
+                if(a.getResult().equals(ButtonType.OK)){
+                    pmc.initializeWeight();
+                    redraw();
+                }
+            });
+        }
+    }
+    @FXML
+    private void handleLearn(ActionEvent e){
+
+    }
+    @FXML
+    private void handleStopLearn(ActionEvent e){
+
+    }
+
+    @FXML
+    private void handleCheckBoxWeight(ActionEvent e){
+        if(checkBoxWeight.isSelected()){
+            webviewStructure.getEngine().executeScript("showWeight()");
+        }else{
+            webviewStructure.getEngine().executeScript("hideWeight()");
+        }
+    }
 
 }

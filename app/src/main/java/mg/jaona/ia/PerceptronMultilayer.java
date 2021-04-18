@@ -32,6 +32,7 @@ public class PerceptronMultilayer {
             g.addVertex(v);
         }
         this.outputVertexes = new Vertex("o");
+        g.addVertex(this.outputVertexes);
     }
 
     public String generateNetworkVariableScript(){
@@ -51,14 +52,27 @@ public class PerceptronMultilayer {
                 sb2.append(this.inputVertexes.get(i).getLabel());
                 sb2.append("', target: '");
                 sb2.append(hiddenVertex.getLabel());
-                sb2.append("', weight: 0 },");
-
-                sb2.append("{source: '");
-                sb2.append(hiddenVertex.getLabel());
-                sb2.append("', target: '");
-                sb2.append(this.outputVertexes.getLabel());
-                sb2.append("', weight: 0 },");
+                sb2.append("', weight:'");
+                if(g.getNullValue() == null ? this.g.getValue(this.inputVertexes.get(i), hiddenVertex) == null : g.getNullValue().equals(this.g.getValue(this.inputVertexes.get(i), hiddenVertex))){
+                    sb2.append("0");
+                }else{
+                    sb2.append(String.format("%.8f", this.g.getValue(this.inputVertexes.get(i), hiddenVertex)));
+                }
+                sb2.append("'},");
             }
+        }
+        for (Vertex hiddenVertex : this.hiddenVertexes) {
+            sb2.append("{source: '");
+            sb2.append(hiddenVertex.getLabel());
+            sb2.append("', target: '");
+            sb2.append(this.outputVertexes.getLabel());
+            sb2.append("', weight:'");
+            if(g.getNullValue() == null ? this.g.getValue(hiddenVertex, this.outputVertexes) == null : g.getNullValue().equals(this.g.getValue( hiddenVertex, this.outputVertexes))){
+                sb2.append("0");
+            }else{
+                sb2.append(String.format("%.8f", this.g.getValue(hiddenVertex, this.outputVertexes)));
+            }
+            sb2.append("'},");
         }
         for (int j = 0; j < this.hiddenVertexes.size(); j++) {
             sb.append("{id:'");
@@ -112,7 +126,7 @@ public class PerceptronMultilayer {
         return res;
     }
 
-    private void initializeWeight() {
+    public void initializeWeight() {
         for (Vertex in : inputVertexes) {
             for (Vertex hi : hiddenVertexes) {
                 this.g.addEdge(in, hi, Double.valueOf(Math.random()).floatValue());
@@ -121,6 +135,17 @@ public class PerceptronMultilayer {
         for (Vertex hi : hiddenVertexes) {
             this.g.addEdge(hi, outputVertexes, Double.valueOf(Math.random()).floatValue());
         }
+    }
+
+    public boolean isWeightInitialized(){
+        if(g.getNullValue() == null){
+            return this.g.getValue(inputVertexes.get(random(inputVertexes.size())), hiddenVertexes.get(random(hiddenVertexes.size()))) != null;
+        }else{
+            return !this.g.getNullValue().equals(this.g.getValue(inputVertexes.get(random(inputVertexes.size())), hiddenVertexes.get(random(hiddenVertexes.size()))));
+        }
+    }
+    private int random(int max){
+        return Double.valueOf(Math.floor(Math.random() * max)).intValue();
     }
 
     private Float forwardPropagation(List<Float> input) {
