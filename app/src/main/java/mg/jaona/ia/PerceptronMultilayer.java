@@ -34,6 +34,50 @@ public class PerceptronMultilayer {
         this.outputVertexes = new Vertex("o");
     }
 
+    public String generateNetworkVariableScript(){
+        StringBuilder sb = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
+        sb.append("var network = {nodes: [");
+        sb2.append("edges: [");
+        for (int i = 0; i < this.inputVertexes.size(); i++) {
+            sb.append("{id:'");
+            sb.append(this.inputVertexes.get(i).getLabel());
+            sb.append( "',nr:");
+            sb.append(i + 1);
+            sb.append(",layer: 1},");
+            for (Vertex hiddenVertex : this.hiddenVertexes) {
+
+                sb2.append("{source: '");
+                sb2.append(this.inputVertexes.get(i).getLabel());
+                sb2.append("', target: '");
+                sb2.append(hiddenVertex.getLabel());
+                sb2.append("', weight: 0 },");
+
+                sb2.append("{source: '");
+                sb2.append(hiddenVertex.getLabel());
+                sb2.append("', target: '");
+                sb2.append(this.outputVertexes.getLabel());
+                sb2.append("', weight: 0 },");
+            }
+        }
+        for (int j = 0; j < this.hiddenVertexes.size(); j++) {
+            sb.append("{id:'");
+            sb.append(this.hiddenVertexes.get(j).getLabel());
+            sb.append("',nr:");
+            sb.append(j + 1);
+            sb.append(",layer: 2},");
+        }
+        sb.append("{id:'");
+        sb.append(this.outputVertexes.getLabel());
+        sb.append( "',nr:");
+        sb.append(1);
+        sb.append(",layer: 3},],");
+        sb2.append("]");
+        sb.append(sb2);
+        sb.append("};");
+        return sb.toString();
+    }
+
     public void fit(List<Float> partSerie, int epoch) {
         while(epoch > 0){
             Deque<Float> deque = new ArrayDeque<>(partSerie);
@@ -169,7 +213,7 @@ public class PerceptronMultilayer {
         this.alpha = alpha;
     }
 
-    static class Structure {
+    public static class Structure {
         public Structure(int nbInputLayer, int nbHiddenLayer) {
             this.nbHiddenLayer = nbHiddenLayer;
             this.nbInputLayer = nbInputLayer;

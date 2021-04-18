@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <svg id="graph"></svg>
+    <script src="d3.v6.min.js"></script>
+    <script>
+        var h, w;
+        h = window.innerHeight;
+        w = window.innerWidth;
+        const color = d3.scaleOrdinal(d3.schemeCategory10)
+        function draw(network, width = w, height = h, thickness = 1.5) {
+            d3.select("svg").select("g").remove();
+            const svg = d3.select("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .classed('chart', true)
+                .append("g");
+            let pos = layout(network, width, height)
+
+            var link = svg
+                .selectAll(".line")
+                .data(network.edges)
+                .enter()
+                .append("line")
+                .attr("x1", d => pos(d.source).x)
+                .attr("y1", d => pos(d.source).y)
+                .attr("x2", d => pos(d.target).x)
+                .attr("y2", d => pos(d.target).y)
+                .attr("stroke-width", 1.5)
+                .attr("stroke", d => "#999")
+            var node = svg
+                .selectAll(".node")
+                .data(network.nodes)
+                .enter().append("circle")
+                .attr("id", (d => `n-${d.layer}-${d.id}`))
+                .attr("cx", d => pos(d.id).x)
+                .attr("cy", d => pos(d.id).y)
+                .attr("r", 25)
+                .attr("stroke", "black")
+                .attr("stroke-width", 2)
+                .attr("fill", d => color(d.layer));
+            var zoomEvent = d3.zoom().on("zoom", (e) => {
+                svg.attr("transform", e.transform)
+            })
+            d3.select("svg").call(zoomEvent)
+        }
+
+        window.onresize = () => {
+            h = window.innerHeight;
+            w = window.innerWidth;
+            var svg = d3.select("svg").attr("viewBox", [0, 0, w, h]);
+        }
+
+        function layout(net, width, height, margin = 50) {
+            // Determine the layer sizes
+            let lsz = net.nodes.reduce((a, i) => {
+                    a[i.layer] = a[i.layer] ? a[i.layer] + 1 : 1;
+                    return a
+                }, {})
+                // Set the horizontal scaler
+            let horz = d3.scaleLinear()
+                .domain([Math.min(...net.nodes.map(n => n.layer)), Math.max(...net.nodes.map(n => n.layer))])
+                .range([margin, width - margin]);
+            const pos = (id) => {
+                const node = net.nodes.find(e => e.id == id);
+                return {
+                    x: horz(node.layer),
+                    y: d3.scaleLinear().domain([0, lsz[node.layer] + 1]).range([0, height])(node.nr)
+                }
+            }
+
+            return pos
+        }
+    </script>
+</body>
+
+</html>
