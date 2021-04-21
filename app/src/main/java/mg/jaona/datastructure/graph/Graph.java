@@ -1,22 +1,21 @@
 package mg.jaona.datastructure.graph;
 
-import java.util.List;
 import java.util.Set;
 
 /**
- * @param <T> The class representing the value manipulated inside Graph
+ * @param <V> The class representing the value manipulated inside Graph
  */
-public interface Graph<T> {
+public interface Graph<T extends Vertex, V> {
 
     /**
      * @param v add Vertex inside Graph
      */
-    void addVertex(Vertex v);
+    void addVertex(T v);
 
     /**
      * @param v delete Vertex inside Graph and all links
      */
-    void deleteVertex(Vertex v);
+    void deleteVertex(T v);
 
     /**
      * Add Edge into graph and set his value
@@ -25,7 +24,7 @@ public interface Graph<T> {
      * @param end   End vertex
      * @param value The value
      */
-    void addEdge(Vertex start, Vertex end, T value);
+    void addEdge(T start, T end, V value);
 
     /**
      * Set value on Edge
@@ -34,7 +33,7 @@ public interface Graph<T> {
      * @param end   End vertex
      * @param value The value
      */
-    void setValue(Vertex start, Vertex end, T value);
+    void setValue(T start, T end, V value);
 
     /**
      * Set value on Edge
@@ -43,7 +42,7 @@ public interface Graph<T> {
      * @param end   End vertex
      * @return T The value
      */
-    T getValue(Vertex start, Vertex end);
+    V getValue(T start, T end);
 
     /**
      * Do nothing if Start or End Vertex not exist
@@ -52,10 +51,10 @@ public interface Graph<T> {
      * @param start Start vertex
      * @param end   End vertex
      */
-    void deleteEdge(Vertex start, Vertex end);
+    void deleteEdge(T start, T end);
 
     /**
      * @return all Vertexes
      */
-    Set<Vertex> getVertexes();
+    Set<T> getVertexes();
 }

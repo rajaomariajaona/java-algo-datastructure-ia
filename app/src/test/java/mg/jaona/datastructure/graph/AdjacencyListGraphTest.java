@@ -12,7 +12,7 @@ class AdjacencyListGraphTest {
 
     @Test
     void addVertex() {
-        Graph<Integer> g = new AdjacencyListGraph();
+        Graph<Vertex, Integer> g = new AdjacencyListGraph();
         Vertex[] vertexes = new Vertex[]{new Vertex("a"),
                 new Vertex("b"),
                 new Vertex("c")};
@@ -30,7 +30,7 @@ class AdjacencyListGraphTest {
     }
 
     private void deleteVertexUnlinked() {
-        Graph<Integer> g = new AdjacencyListGraph();
+        Graph<Vertex, Integer> g = new AdjacencyListGraph();
         Vertex[] vertexes = new Vertex[]{new Vertex("a"),
                 new Vertex("b")};
         g.addVertex(new Vertex("c"));
@@ -53,7 +53,7 @@ class AdjacencyListGraphTest {
             }
             list.put(e, edge);
         }
-        AdjacencyListGraph<Integer> g = new AdjacencyListGraph();
+        AdjacencyListGraph<Vertex, Integer> g = new AdjacencyListGraph();
         for (Vertex e : vertexes) {
             g.addVertex(e);
         }
@@ -85,7 +85,7 @@ class AdjacencyListGraphTest {
             }
             list.put(e, edge);
         }
-        AdjacencyListGraph<Integer> g = new AdjacencyListGraph();
+        AdjacencyListGraph<Vertex, Integer> g = new AdjacencyListGraph();
         for (Vertex e : vertexes) {
             g.addVertex(e);
         }
@@ -135,7 +135,7 @@ class AdjacencyListGraphTest {
             }
             list.put(e, edge);
         }
-        AdjacencyListGraph<Integer> g = new AdjacencyListGraph();
+        AdjacencyListGraph<Vertex, Integer> g = new AdjacencyListGraph();
         for (Vertex e : vertexes) {
             g.addVertex(e);
         }
@@ -151,7 +151,7 @@ class AdjacencyListGraphTest {
     @Test
     void deleteEdge() {
         assertDoesNotThrow(() -> {
-            Graph<Integer> g = new AdjacencyListGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyListGraph<>();
             g.addVertex(new Vertex("a"));
             g.addVertex(new Vertex("b"));
             g.addEdge(new Vertex("a"), new Vertex("b"), 10);
@@ -165,27 +165,27 @@ class AdjacencyListGraphTest {
     @Test
     void getValue() {
         assertThrows(IllegalArgumentException.class, () -> {
-            Graph<Integer> g = new AdjacencyListGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyListGraph<>();
             g.getValue(new Vertex("v"), new Vertex("e"));
         }, "No Vertex");
         assertThrows(IllegalArgumentException.class, () -> {
-            Graph<Integer> g = new AdjacencyListGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyListGraph<>();
             g.addVertex(new Vertex("a"));
             g.getValue(new Vertex("a"), new Vertex("b"));
         }, "Only Start Vertex");
         assertThrows(IllegalArgumentException.class, () -> {
-            Graph<Integer> g = new AdjacencyListGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyListGraph<>();
             g.addVertex(new Vertex("b"));
             g.getValue(new Vertex("a"), new Vertex("b"));
         }, "Only End Vertex");
         assertThrows(IllegalArgumentException.class, () -> {
-            Graph<Integer> g = new AdjacencyListGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyListGraph<>();
             g.addVertex(new Vertex("a"));
             g.addVertex(new Vertex("b"));
             g.getValue(new Vertex("a"), new Vertex("b"));
         }, "No Edge");
         assertDoesNotThrow(() -> {
-            Graph<Integer> g = new AdjacencyListGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyListGraph<>();
             g.addVertex(new Vertex("a"));
             g.addVertex(new Vertex("b"));
             g.addEdge(new Vertex("a"), new Vertex("b"), 10);

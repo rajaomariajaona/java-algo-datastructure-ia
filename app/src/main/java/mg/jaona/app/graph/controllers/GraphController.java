@@ -14,7 +14,7 @@ public class GraphController implements Initializable {
     @FXML
     private WebView webview;
 
-    private AdjacencyListGraph<Integer> g;
+    private AdjacencyListGraph<Vertex,Integer> g;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

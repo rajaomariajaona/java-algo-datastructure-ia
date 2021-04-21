@@ -3,9 +3,9 @@ package mg.jaona.datastructure.graph;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AdjacencyListGraph<T> implements Graph<T> {
-    private Set<Vertex> vertexes;
-    private Map<Vertex, List<Map.Entry<Vertex, T>>> list;
+public class AdjacencyListGraph<T extends Vertex, V> implements Graph<T, V> {
+    private Set<T> vertexes;
+    private Map<T, List<Map.Entry<T, V>>> list;
 
     public AdjacencyListGraph() {
         vertexes = new HashSet<>();
@@ -16,7 +16,7 @@ public class AdjacencyListGraph<T> implements Graph<T> {
      * @param v add Vertex inside Graph
      */
     @Override
-    public void addVertex(Vertex v) {
+    public void addVertex(T v) {
         vertexes.add(v);
         list.put(v, new ArrayList<>());
     }
@@ -25,7 +25,7 @@ public class AdjacencyListGraph<T> implements Graph<T> {
      * @param v delete Vertex inside Graph and all links
      */
     @Override
-    public void deleteVertex(Vertex v) {
+    public void deleteVertex(T v) {
         vertexes.forEach(vertex -> {
             this.deleteEdge(vertex, v);
         });
@@ -42,9 +42,9 @@ public class AdjacencyListGraph<T> implements Graph<T> {
      * @throws IllegalArgumentException if vertex not exist on graph
      */
     @Override
-    public void addEdge(Vertex start, Vertex end, T value) {
+    public void addEdge(T start, T end, V value) {
         if (vertexes.contains(start) && vertexes.contains(end)) {
-            list.get(start).add(new AbstractMap.SimpleEntry<Vertex, T>(end, value));
+            list.get(start).add(new AbstractMap.SimpleEntry<T, V>(end, value));
         } else {
             throw new IllegalArgumentException("Vertex not exist on graph");
         }
@@ -59,8 +59,8 @@ public class AdjacencyListGraph<T> implements Graph<T> {
      * @throws IllegalArgumentException if Edge don't exist
      */
     @Override
-    public void setValue(Vertex start, Vertex end, T value) {
-        List<Map.Entry<Vertex, T>> edges = list.get(start);
+    public void setValue(T start, T end, V value) {
+        List<Map.Entry<T, V>> edges = list.get(start);
         List<Map.Entry> res = edges.stream().filter(entry -> entry.getKey().equals(end)).limit(1).collect(Collectors.toList());
         if (res.size() == 0) {
             throw new IllegalArgumentException("Edge don't exist");
@@ -80,7 +80,7 @@ public class AdjacencyListGraph<T> implements Graph<T> {
      * @throws IllegalArgumentException if Edge don't exist
      */
     @Override
-    public T getValue(Vertex start, Vertex end) {
+    public V getValue(T start, T end) {
         if (vertexes.contains(start) && vertexes.contains(end)) {
             var edge = list.get(start).stream().filter(entry -> entry.getKey().equals(end)).limit(1).collect(Collectors.toList());
             if (edge.size() != 1) {
@@ -101,7 +101,7 @@ public class AdjacencyListGraph<T> implements Graph<T> {
      * @param end   End vertex
      */
     @Override
-    public void deleteEdge(Vertex start, Vertex end) {
+    public void deleteEdge(T start, T end) {
         if (vertexes.contains(start) && vertexes.contains(end)) {
             list.get(start).removeIf(entry -> entry.getKey().equals(end));
         }
@@ -111,14 +111,14 @@ public class AdjacencyListGraph<T> implements Graph<T> {
      * @return all Vertexes
      */
     @Override
-    public Set<Vertex> getVertexes() {
+    public Set<T> getVertexes() {
         return vertexes;
     }
 
     /**
      * @return Adjacency List
      */
-    public Map<Vertex, List<Map.Entry<Vertex, T>>> getList() {
+    public Map<T, List<Map.Entry<T, V>>> getList() {
         return list;
     }
 }

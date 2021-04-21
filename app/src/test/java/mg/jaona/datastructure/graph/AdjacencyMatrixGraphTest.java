@@ -12,7 +12,7 @@ class AdjacencyMatrixGraphTest {
 
     @Test
     void addVertex() {
-        AdjacencyMatrixGraph<Integer> g = new AdjacencyMatrixGraph();
+        AdjacencyMatrixGraph<Vertex, Integer> g = new AdjacencyMatrixGraph();
         Vertex[] vertexes = new Vertex[]{new Vertex("a"),
                 new Vertex("b"),
                 new Vertex("c")};
@@ -35,7 +35,7 @@ class AdjacencyMatrixGraphTest {
     }
 
     private void deleteVertexUnlinked() {
-        Graph<Integer> g = new AdjacencyMatrixGraph();
+        Graph<Vertex, Integer> g = new AdjacencyMatrixGraph();
         Vertex[] vertexes = new Vertex[]{new Vertex("a"),
                 new Vertex("b")};
         g.addVertex(new Vertex("c"));
@@ -58,7 +58,7 @@ class AdjacencyMatrixGraphTest {
             }
             list.put(e, edge);
         }
-        AdjacencyMatrixGraph<Integer> g = new AdjacencyMatrixGraph();
+        AdjacencyMatrixGraph<Vertex, Integer> g = new AdjacencyMatrixGraph();
         for (Vertex e : vertexes) {
             g.addVertex(e);
         }
@@ -88,7 +88,7 @@ class AdjacencyMatrixGraphTest {
             }
             list.put(e, edge);
         }
-        AdjacencyMatrixGraph<Integer> g = new AdjacencyMatrixGraph();
+        AdjacencyMatrixGraph<Vertex, Integer> g = new AdjacencyMatrixGraph();
         for (Vertex e : vertexes) {
             g.addVertex(e);
         }
@@ -133,7 +133,7 @@ class AdjacencyMatrixGraphTest {
             }
             list.put(e, edge);
         }
-        AdjacencyMatrixGraph<Integer> g = new AdjacencyMatrixGraph();
+        AdjacencyMatrixGraph<Vertex, Integer> g = new AdjacencyMatrixGraph();
         for (Vertex e : vertexes) {
             g.addVertex(e);
         }
@@ -149,7 +149,7 @@ class AdjacencyMatrixGraphTest {
     @Test
     void deleteEdge() {
         assertDoesNotThrow(() -> {
-            Graph<Integer> g = new AdjacencyMatrixGraph<>(0);
+            Graph<Vertex, Integer> g = new AdjacencyMatrixGraph<>(0);
             g.addVertex(new Vertex("a"));
             g.addVertex(new Vertex("b"));
             g.addEdge(new Vertex("a"), new Vertex("b"), 10);
@@ -163,27 +163,27 @@ class AdjacencyMatrixGraphTest {
     @Test
     void getValue() {
         assertThrows(IllegalArgumentException.class, () -> {
-            Graph<Integer> g = new AdjacencyMatrixGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyMatrixGraph<>();
             g.getValue(new Vertex("v"), new Vertex("e"));
         }, "No Vertex");
         assertThrows(IllegalArgumentException.class, () -> {
-            Graph<Integer> g = new AdjacencyMatrixGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyMatrixGraph<>();
             g.addVertex(new Vertex("a"));
             g.getValue(new Vertex("a"), new Vertex("b"));
         }, "Only Start Vertex");
         assertThrows(IllegalArgumentException.class, () -> {
-            Graph<Integer> g = new AdjacencyMatrixGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyMatrixGraph<>();
             g.addVertex(new Vertex("b"));
             g.getValue(new Vertex("a"), new Vertex("b"));
         }, "Only End Vertex");
         assertDoesNotThrow(() -> {
-            Graph<Integer> g = new AdjacencyMatrixGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyMatrixGraph<>();
             g.addVertex(new Vertex("a"));
             g.addVertex(new Vertex("b"));
             assertNull(g.getValue(new Vertex("a"), new Vertex("b")));
         }, "No Edge");
         assertDoesNotThrow(() -> {
-            Graph<Integer> g = new AdjacencyMatrixGraph<>();
+            Graph<Vertex, Integer> g = new AdjacencyMatrixGraph<>();
             g.addVertex(new Vertex("a"));
             g.addVertex(new Vertex("b"));
             g.addEdge(new Vertex("a"), new Vertex("b"), 10);
@@ -193,7 +193,7 @@ class AdjacencyMatrixGraphTest {
 
     @Test
     void nullValue() {
-        AdjacencyMatrixGraph<Integer> g = new AdjacencyMatrixGraph<>();
+        AdjacencyMatrixGraph<Vertex, Integer> g = new AdjacencyMatrixGraph<>();
         g.addVertex(new Vertex("a"));
         g.addVertex(new Vertex("b"));
         Map<Vertex, Map<Vertex, Integer>> matrix = g.getMatrix();
@@ -202,7 +202,7 @@ class AdjacencyMatrixGraphTest {
                 assertNull(matrix.get(i).get(j), "Default null value is not Null");
             }
         }
-        AdjacencyMatrixGraph<Integer> g2 = new AdjacencyMatrixGraph<>(0);
+        AdjacencyMatrixGraph<Vertex, Integer> g2 = new AdjacencyMatrixGraph<>(0);
         g2.addVertex(new Vertex("a"));
         g2.addVertex(new Vertex("b"));
         Map<Vertex, Map<Vertex, Integer>> matrix2 = g2.getMatrix();

@@ -3,7 +3,7 @@ package mg.jaona.ia;
 import mg.jaona.datastructure.graph.Vertex;
 
 public class VertexPML<T> extends Vertex {
-    private T value = null;
+    private T data = null;
     /**
      * Constructor with parameter
      *
@@ -13,16 +13,16 @@ public class VertexPML<T> extends Vertex {
         super(label);
     }
 
-    public VertexPML(String label, T value) {
+    public VertexPML(String label, T data) {
         super(label);
-        this.value = value;
+        this.data = data;
     }
 
-    public T getValue() {
-        return value;
+    public T getData() {
+        return data;
     }
 
-    public void setValue(T value) {
-        this.value = value;
+    public void setData(T data) {
+        this.data = data;
     }
 }

@@ -5,7 +5,6 @@ package mg.jaona.datastructure.graph;
  */
 public class Vertex {
     private String label;
-
     /**
      * Constructor with parameter
      * @param label The vertex label

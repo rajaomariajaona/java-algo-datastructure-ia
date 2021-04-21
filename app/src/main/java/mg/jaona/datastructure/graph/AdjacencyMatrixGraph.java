@@ -1,29 +1,14 @@
 package mg.jaona.datastructure.graph;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class AdjacencyMatrixGraph<T> implements Graph<T> {
-    private Map<Vertex, Map<Vertex, T>> matrix;
-    private T nullValue;
+public class AdjacencyMatrixGraph<T extends Vertex, V> implements Graph<T, V> {
+    private Map<T, Map<T, V>> matrix;
+    private V nullValue;
 
-    public AdjacencyMatrixGraph(T nullValue) {
+    public AdjacencyMatrixGraph(V nullValue) {
         matrix = new HashMap<>();
         this.nullValue = nullValue;
-    }
-
-    public AdjacencyMatrixGraph(AdjacencyMatrixGraph<T> graph) {
-        this.matrix = new HashMap<>();
-        var m = graph.getMatrix();
-        for (Vertex v : m.keySet()) {
-            matrix.put(v, new HashMap<>());
-        }
-        for (Vertex i : m.keySet()) {
-            for (Vertex j : m.get(i).keySet()) {
-                matrix.get(i).put(j, m.get(i).get(j));
-            }
-        }
-        this.nullValue = graph.getNullValue();
     }
 
     public AdjacencyMatrixGraph() {
@@ -35,10 +20,10 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
      * @param v add Vertex inside Graph
      */
     @Override
-    public void addVertex(Vertex v) {
-        Set<Vertex> vertexes = matrix.keySet();
+    public void addVertex(T v) {
+        Set<T> vertexes = matrix.keySet();
         matrix.put(v, new HashMap<>());
-        for (Vertex key : vertexes) {
+        for (T key : vertexes) {
             matrix.get(v).put(key, nullValue);
             matrix.get(key).put(v, nullValue);
         }
@@ -49,9 +34,9 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
      * @param v delete Vertex inside Graph and all links
      */
     @Override
-    public void deleteVertex(Vertex v) {
+    public void deleteVertex(T v) {
         matrix.remove(v);
-        for (Vertex i : matrix.keySet()) {
+        for (T i : matrix.keySet()) {
             matrix.get(i).remove(v);
         }
     }
@@ -65,7 +50,7 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
      * @throws IllegalArgumentException if vertex not exist on graph
      */
     @Override
-    public void addEdge(Vertex start, Vertex end, T value) {
+    public void addEdge(T start, T end, V value) {
         if(value.equals(nullValue)){
             throw new IllegalArgumentException("Edge not added because null value");
         }else{
@@ -82,7 +67,7 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
      * @throws IllegalArgumentException if Edge don't exist
      */
     @Override
-    public void setValue(Vertex start, Vertex end, T value) {
+    public void setValue(T start, T end, V value) {
         if (matrix.containsKey(start) && matrix.containsKey(end)) {
             matrix.get(start).replace(end, value);
         } else {
@@ -95,11 +80,11 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
      *
      * @param start Start vertex
      * @param end   End vertex
-     * @return T The value
+     * @return V2 The value
      * @throws IllegalArgumentException if Edge don't exist
      */
     @Override
-    public T getValue(Vertex start, Vertex end) {
+    public V getValue(T start, T end) {
         if (matrix.containsKey(start) && matrix.containsKey(end)) {
             return matrix.get(start).get(end);
         } else {
@@ -115,7 +100,7 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
      * @param end   End vertex
      */
     @Override
-    public void deleteEdge(Vertex start, Vertex end) {
+    public void deleteEdge(T start, T end) {
         if (matrix.containsKey(start) && matrix.containsKey(end)) {
             matrix.get(start).replace(end, nullValue);
         }
@@ -125,11 +110,11 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
      * @return all Vertexes
      */
     @Override
-    public Set<Vertex> getVertexes() {
+    public Set<T> getVertexes() {
         return matrix.keySet();
     }
 
-    public Map<Vertex, Map<Vertex, T>> getMatrix() {
+    public Map<T, Map<T, V>> getMatrix() {
         return matrix;
     }
 
@@ -138,7 +123,7 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
      *
      * @return null Value
      */
-    public T getNullValue() {
+    public V getNullValue() {
         return nullValue;
     }
 
@@ -147,10 +132,10 @@ public class AdjacencyMatrixGraph<T> implements Graph<T> {
      *
      * @param nullValue is the value if there is no edge between two vertex
      */
-    public void setNullValue(T nullValue) {
-        T oldValue = this.nullValue;
-        for (Vertex i : this.matrix.keySet()) {
-            for (Vertex j: this.matrix.get(i).keySet()) {
+    public void setNullValue(V nullValue) {
+        V oldValue = this.nullValue;
+        for (T i : this.matrix.keySet()) {
+            for (T j: this.matrix.get(i).keySet()) {
                 if(this.matrix.get(i).get(j) == null ? oldValue == null : this.matrix.get(i).get(j).equals(oldValue)){
                     this.matrix.get(i).replace(j, nullValue);
                 }
