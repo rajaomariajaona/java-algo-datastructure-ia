@@ -98,7 +98,7 @@ public class SerieTemporelleController implements Initializable {
             }
             btnLearn.setDisable(inputMaxEpoch.getText().trim().equals("") || inputAlpha.getText().trim().equals(""));
         });
-        menuAccordion.expandedPaneProperty().addListener((observable, oldValue, newValue) -> {
+        menuAccordion.expandedPaneProperty().addListener((observable, oldVchildrenalue, newValue) -> {
             if (newValue != null)
                 mapPaneTitled.get(newValue).toFront();
         });
