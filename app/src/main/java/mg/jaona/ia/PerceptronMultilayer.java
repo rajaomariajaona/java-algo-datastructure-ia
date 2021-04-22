@@ -1,17 +1,16 @@
 package mg.jaona.ia;
 
 import mg.jaona.datastructure.graph.AdjacencyMatrixGraph;
-import mg.jaona.datastructure.graph.Vertex;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class PerceptronMultilayer {
     private Structure structure;
-    private AdjacencyMatrixGraph<Float> g;
-    private List<Vertex> inputVertexes;
-    private List<Vertex> hiddenVertexes;
-    private Vertex outputVertexes;
+    private AdjacencyMatrixGraph<VertexPML<VertexData>, Float> g;
+    private List<VertexPML<VertexData>> inputVertexes;
+    private List<VertexPML<VertexData>> hiddenVertexes;
+    private VertexPML<VertexData> outputVertexes;
     private Float alpha = 0.1f;
 
     public PerceptronMultilayer(Structure structure) {
@@ -21,16 +20,16 @@ public class PerceptronMultilayer {
         this.outputVertexes = null;
         this.g = new AdjacencyMatrixGraph<>();
         for (int i = 0; i < structure.getNbInputLayer(); i++) {
-            Vertex v = new Vertex("i" + i);
+            VertexPML<VertexData> v = new VertexPML<VertexData>("i" + i, new VertexData());
             this.inputVertexes.add(v);
             g.addVertex(v);
         }
         for (int i = 0; i < structure.getNbHiddenLayer(); i++) {
-            Vertex v = new Vertex("h" + i);
+            VertexPML<VertexData> v = new VertexPML<VertexData>("h" + i, new VertexData());
             this.hiddenVertexes.add(v);
             g.addVertex(v);
         }
-        this.outputVertexes = new Vertex("o");
+        this.outputVertexes = new VertexPML<VertexData>("o", new VertexData());
         g.addVertex(this.outputVertexes);
     }
 
@@ -45,7 +44,7 @@ public class PerceptronMultilayer {
             sb.append("',nr:");
             sb.append(i + 1);
             sb.append(",layer: 1},");
-            for (Vertex hiddenVertex : this.hiddenVertexes) {
+            for (VertexPML<VertexData> hiddenVertex : this.hiddenVertexes) {
 
                 sb2.append("{source: '");
                 sb2.append(this.inputVertexes.get(i).getLabel());
@@ -60,7 +59,7 @@ public class PerceptronMultilayer {
                 sb2.append("'},");
             }
         }
-        for (Vertex hiddenVertex : this.hiddenVertexes) {
+        for (VertexPML<VertexData> hiddenVertex : this.hiddenVertexes) {
             sb2.append("{source: '");
             sb2.append(hiddenVertex.getLabel());
             sb2.append("', target: '");
@@ -119,7 +118,7 @@ public class PerceptronMultilayer {
             while (deque.size() > structure.nbInputLayer) {
                 List<Float> toPropagate = deque.stream().limit(structure.nbInputLayer + 1).collect(Collectors.toList());
                 Float expected = toPropagate.remove(structure.nbInputLayer);
-                Float actual = forwardPropagation(toPropagate);
+                Float actual = feedForward(toPropagate);
                 expectedTest.add(expected);
                 actualTest.add(actual);
                 deque.removeFirst();
@@ -138,7 +137,7 @@ public class PerceptronMultilayer {
             throw new IllegalArgumentException("Step invalid");
         } else {
             for (int i = 0; i < step; i++) {
-                Float pred = forwardPropagation(new ArrayList<>(queueInput));
+                Float pred = feedForward(new ArrayList<>(queueInput));
                 res.add(pred);
                 queueInput.removeLast();
                 queueInput.addFirst(pred);
@@ -148,14 +147,19 @@ public class PerceptronMultilayer {
     }
 
     public void initializeWeight() {
-        for (Vertex in : inputVertexes) {
-            for (Vertex hi : hiddenVertexes) {
-                this.g.addEdge(in, hi, Double.valueOf(Math.random()).floatValue());
+        for (VertexPML<VertexData> in : inputVertexes) {
+            for (VertexPML<VertexData> hi : hiddenVertexes) {
+                this.g.addEdge(in, hi, randomWeight());
             }
         }
-        for (Vertex hi : hiddenVertexes) {
-            this.g.addEdge(hi, outputVertexes, Double.valueOf(Math.random()).floatValue());
+        for (VertexPML<VertexData> hi : hiddenVertexes) {
+            this.g.addEdge(hi, outputVertexes, randomWeight());
         }
+    }
+
+    private float randomWeight(){
+        return Double.valueOf(Math.random()).floatValue();
+//        return Double.valueOf(Math.random() * 0.001 + 0.00001).floatValue();
     }
 
     public boolean isWeightInitialized() {
@@ -170,84 +174,71 @@ public class PerceptronMultilayer {
         return Double.valueOf(Math.floor(Math.random() * max)).intValue();
     }
 
-    public Float forwardPropagation(List<Float> input) {
-        Float out = 0f;
-        if (input.size() != structure.getNbInputLayer()) {
-            throw new IllegalArgumentException("Input and input Layer size is different");
-        } else {
-            Map<Vertex, Float> inputValues = new HashMap<>();
-            int i = 0;
-            for (Vertex in : this.inputVertexes) {
-                inputValues.put(in, input.get(i++));
-            }
-            Map<Vertex, Float> middleValues = new HashMap<>();
-
-            for (Vertex in : inputVertexes) {
-                Float valIn = inputValues.get(in);
-                for (Vertex hi : hiddenVertexes) {
-                    if (middleValues.containsKey(hi)) {
-                        middleValues.replace(hi, middleValues.get(hi) + valIn * this.g.getValue(in, hi));
-                    } else {
-                        middleValues.put(hi, valIn * this.g.getValue(in, hi));
-                    }
-                }
-
-            }
-            middleValues = middleValues.entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),
-                    SigmoidFunction.compute(entry.getValue()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-            for (Vertex hi : hiddenVertexes) {
-                out += middleValues.get(hi) * this.g.getValue(hi,this.outputVertexes);
-            }
-            out = SigmoidFunction.compute(out);
+    private void resetSumVertexValues() {
+        for (VertexPML<VertexData> v : this.hiddenVertexes) {
+            v.getData().setSum(0f);
         }
-        return out;
+        this.outputVertexes.getData().setSum(0f);
     }
 
-    private Float propagateOneValue(List<Float> input, Float expected) {
-        Float out = 0f;
+    public Float feedForward(List<Float> input) {
+        if (input.size() != this.structure.getNbInputLayer()) {
+            throw new IllegalArgumentException("Input and input Layer size is different");
+        } else {
+            resetSumVertexValues();
+            int i = 0;
+            for (VertexPML<VertexData> in : this.inputVertexes) {
+                in.getData().setOutput(input.get(i++));
+            }
+            for (VertexPML<VertexData> in : inputVertexes) {
+                Float valIn = in.getData().getOutput();
+                for (VertexPML<VertexData> hi : hiddenVertexes) {
+                    hi.getData().incrementSum(valIn);
+                }
+            }
+            for (VertexPML<VertexData> hi : hiddenVertexes) {
+                hi.getData().setOutput(SigmoidFunction.compute(hi.getData().getSum()));
+            }
+            for (VertexPML<VertexData> hi : hiddenVertexes) {
+                this.outputVertexes.getData().incrementSum(hi.getData().getOutput());
+            }
+            this.outputVertexes.getData().setOutput(SigmoidFunction.compute(this.outputVertexes.getData().getSum()));
+            return this.outputVertexes.getData().getOutput();
+        }
+    }
+
+    public Float propagateOneValue(List<Float> input, Float expected) {
         if (input.size() != structure.getNbInputLayer()) {
             throw new IllegalArgumentException("Input and input Layer size is different");
         } else {
-            Map<Vertex, Float> inputValues = new HashMap<>();
-            int i = 0;
-            for (Vertex in : this.inputVertexes) {
-                inputValues.put(in, input.get(i++));
+            Float out = feedForward(input);
+            float diff = expected - out;
+            // hi = sum at output vertex
+            float siDerivative = SigmoidFunction.derivative(this.outputVertexes.getData().getSum());
+            this.outputVertexes.getData().setDelta(diff * siDerivative);
+            for (VertexPML<VertexData> hi : this.hiddenVertexes) {
+                // LOOP ON output vertexes if containing multiple output vertexes
+                hi.getData().setDelta(this.outputVertexes.getData().getDelta() * this.g.getValue(hi, this.outputVertexes) * SigmoidFunction.derivative(hi.getData().getSum()));
             }
-            Map<Vertex, Float> middleValues = new HashMap<>();
+            updateWeight();
+            return Double.valueOf(0.5 * Math.pow(diff, 2.0)).floatValue();
+        }
+    }
 
-            for (Vertex in : inputVertexes) {
-                Float valIn = inputValues.get(in);
-                for (Vertex hi : hiddenVertexes) {
-                    if (middleValues.containsKey(hi)) {
-                        middleValues.replace(hi, middleValues.get(hi) + valIn * this.g.getValue(in, hi));
-                    } else {
-                        middleValues.put(hi, valIn * this.g.getValue(in, hi));
-                    }
-                }
+    private void updateWeight() {
+        for (VertexPML<VertexData> hi : hiddenVertexes) {
+            Float oldWeight = this.g.getValue(hi, this.outputVertexes);
+            // delta in the output layer * Output at the last hidden layer * alpha
+            this.g.setValue(hi, this.outputVertexes, oldWeight + this.alpha * this.outputVertexes.getData().getDelta() * hi.getData().getOutput());
+        }
 
-            }
-            middleValues = middleValues.entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),
-                    SigmoidFunction.compute(entry.getValue()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-            for (Vertex hi : hiddenVertexes) {
-                out += middleValues.get(hi) * this.g.getValue(hi,this.outputVertexes);
-            }
-            out = SigmoidFunction.compute(out);
-            AdjacencyMatrixGraph<Float> graph = new AdjacencyMatrixGraph(this.g);
-            Float diff = out - expected;
-            for (Vertex hi : this.hiddenVertexes) {
-                Float w = graph.getValue(hi, this.outputVertexes);
-                w -= this.alpha * w * middleValues.get(hi) * diff;
-                this.g.setValue(hi, this.outputVertexes, w);
-            }
-            for (Vertex hi : this.hiddenVertexes) {
-                for (Vertex in : this.inputVertexes) {
-                    Float w = graph.getValue(in, hi);
-                    w -= this.alpha * inputValues.get(in) * graph.getValue(hi, this.outputVertexes) * diff * middleValues.get(hi) * (1 - middleValues.get(hi));
-                    this.g.setValue(in, hi, w);
-                }
+        // delta in the hidden layer * Output at the first layer (input if the input layer) * alpha
+        for (VertexPML<VertexData> in : inputVertexes) {
+            for (VertexPML<VertexData> hi : hiddenVertexes) {
+                Float oldWeight = this.g.getValue(in, hi);
+                this.g.setValue(in, hi, oldWeight + this.alpha * in.getData().getOutput() * hi.getData().getDelta());
             }
         }
-        return out;
     }
 
     public Float getAlpha() {
@@ -283,4 +274,5 @@ public class PerceptronMultilayer {
             this.nbInputLayer = nbInputLayer;
         }
     }
+
 }
