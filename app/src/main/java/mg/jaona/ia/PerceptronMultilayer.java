@@ -157,7 +157,7 @@ public class PerceptronMultilayer {
         }
     }
 
-    private float randomWeight(){
+    private float randomWeight() {
         return Double.valueOf(Math.random()).floatValue();
 //        return Double.valueOf(Math.random() * 0.001 + 0.00001).floatValue();
     }
@@ -193,14 +193,14 @@ public class PerceptronMultilayer {
             for (VertexPML<VertexData> in : inputVertexes) {
                 Float valIn = in.getData().getOutput();
                 for (VertexPML<VertexData> hi : hiddenVertexes) {
-                    hi.getData().incrementSum(valIn);
+                    hi.getData().incrementSum(valIn * this.g.getValue(in, hi));
                 }
             }
             for (VertexPML<VertexData> hi : hiddenVertexes) {
                 hi.getData().setOutput(SigmoidFunction.compute(hi.getData().getSum()));
             }
             for (VertexPML<VertexData> hi : hiddenVertexes) {
-                this.outputVertexes.getData().incrementSum(hi.getData().getOutput());
+                this.outputVertexes.getData().incrementSum(hi.getData().getOutput() * this.g.getValue(hi, this.outputVertexes));
             }
             this.outputVertexes.getData().setOutput(SigmoidFunction.compute(this.outputVertexes.getData().getSum()));
             return this.outputVertexes.getData().getOutput();
