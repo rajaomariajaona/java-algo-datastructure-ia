@@ -1,10 +1,11 @@
 package mg.jaona.ia;
 
 public class VertexData {
+    public static enum VertexType {NORMAL, BIAS};
     private Float sum;
     private Float output;
     private Float delta;
-
+    private VertexType type = VertexType.NORMAL;
     public VertexData(Float sum, Float output, Float delta) {
         this.sum = sum;
         this.output = output;
@@ -42,5 +43,16 @@ public class VertexData {
 
     public void setDelta(Float delta) {
         this.delta = delta;
+    }
+
+    public VertexType getType() {
+        return type;
+    }
+
+    public void setType(VertexType type) {
+        if(type == VertexType.BIAS){
+            this.setOutput(1f);
+        }
+        this.type = type;
     }
 }
