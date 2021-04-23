@@ -19,11 +19,24 @@ public class PerceptronMultilayer {
         this.hiddenVertexes = new ArrayList<>();
         this.outputVertexes = null;
         this.g = new AdjacencyMatrixGraph<>();
+        VertexData vertexData = new VertexData();
+        vertexData.setType(VertexData.VertexType.BIAS);
+        VertexPML<VertexData> vertexPML = new VertexPML<VertexData>("bin", vertexData);
+        this.inputVertexes.add(vertexPML);
+        this.g.addVertex(vertexPML);
+
         for (int i = 0; i < structure.getNbInputLayer(); i++) {
             VertexPML<VertexData> v = new VertexPML<VertexData>("i" + i, new VertexData());
             this.inputVertexes.add(v);
             g.addVertex(v);
         }
+
+        VertexData vertexData2 = new VertexData();
+        vertexData2.setType(VertexData.VertexType.BIAS);
+        VertexPML<VertexData> vertexPML2 = new VertexPML<VertexData>("bhi", vertexData2);
+        this.hiddenVertexes.add(vertexPML2);
+        this.g.addVertex(vertexPML2);
+
         for (int i = 0; i < structure.getNbHiddenLayer(); i++) {
             VertexPML<VertexData> v = new VertexPML<VertexData>("h" + i, new VertexData());
             this.hiddenVertexes.add(v);
@@ -45,6 +58,9 @@ public class PerceptronMultilayer {
             sb.append(i + 1);
             sb.append(",layer: 1},");
             for (VertexPML<VertexData> hiddenVertex : this.hiddenVertexes) {
+                if (hiddenVertex.getData().getType() == VertexData.VertexType.BIAS) {
+                    continue;
+                }
 
                 sb2.append("{source: '");
                 sb2.append(this.inputVertexes.get(i).getLabel());
@@ -91,6 +107,7 @@ public class PerceptronMultilayer {
     }
 
     public void fit(List<Float> serie, int epoch, float testRatio, NMSE.NMSECallback callback) {
+        List<NMSE> errors = new ArrayList<>();
 
         if (testRatio >= 1 || testRatio < 0) {
             throw new IllegalArgumentException("Test ration is not enough");
@@ -123,7 +140,14 @@ public class PerceptronMultilayer {
                 actualTest.add(actual);
                 deque.removeFirst();
             }
-            callback.pass(NMSE.compute(expectedFit, actualFit, expectedTest, actualTest));
+            errors.add(NMSE.compute(expectedFit, actualFit, expectedTest, actualTest));
+            callback.pass(errors.get(errors.size() - 1));
+            if(errors.get(errors.size() - 1).getFit() - errors.get(errors.size() - 1).getTest() < 0.00001f){
+                for (int i = 0; i < actualFit.size(); i++) {
+                    System.out.println(i + " expected: "+ expectedFit.get(i) + " actual: " + actualFit.get(i));
+                }
+                break;
+            }
             epoch--;
         }
     }
@@ -149,24 +173,38 @@ public class PerceptronMultilayer {
     public void initializeWeight() {
         for (VertexPML<VertexData> in : inputVertexes) {
             for (VertexPML<VertexData> hi : hiddenVertexes) {
-                this.g.addEdge(in, hi, randomWeight());
+                if (hi.getData().getType() != VertexData.VertexType.BIAS) {
+                    this.g.addEdge(in, hi, randomWeight());
+                }
             }
         }
         for (VertexPML<VertexData> hi : hiddenVertexes) {
             this.g.addEdge(hi, outputVertexes, randomWeight());
         }
     }
+    public void initializeWeight(Float value) {
+        for (VertexPML<VertexData> in : inputVertexes) {
+            for (VertexPML<VertexData> hi : hiddenVertexes) {
+                if (hi.getData().getType() != VertexData.VertexType.BIAS) {
+                    this.g.addEdge(in, hi, value);
+                }
+            }
+        }
+        for (VertexPML<VertexData> hi : hiddenVertexes) {
+            this.g.addEdge(hi, outputVertexes, value);
+        }
+    }
 
     private float randomWeight() {
-        return Double.valueOf(Math.random()).floatValue();
+        return Double.valueOf(Math.random() - 0.5).floatValue();
 //        return Double.valueOf(Math.random() * 0.001 + 0.00001).floatValue();
     }
 
     public boolean isWeightInitialized() {
         if (g.getNullValue() == null) {
-            return this.g.getValue(inputVertexes.get(random(inputVertexes.size())), hiddenVertexes.get(random(hiddenVertexes.size()))) != null;
+            return this.g.getValue(inputVertexes.get(random(inputVertexes.size() - 1) + 1), hiddenVertexes.get(random(hiddenVertexes.size() - 1) + 1)) != null;
         } else {
-            return !this.g.getNullValue().equals(this.g.getValue(inputVertexes.get(random(inputVertexes.size())), hiddenVertexes.get(random(hiddenVertexes.size()))));
+            return !this.g.getNullValue().equals(this.g.getValue(inputVertexes.get(random(inputVertexes.size() - 1) + 1), hiddenVertexes.get(random(hiddenVertexes.size() - 1) + 1)));
         }
     }
 
@@ -187,17 +225,25 @@ public class PerceptronMultilayer {
         } else {
             resetSumVertexValues();
             int i = 0;
+            // PUT the input into VERTEXES in input LAYER as data output
             for (VertexPML<VertexData> in : this.inputVertexes) {
-                in.getData().setOutput(input.get(i++));
+                if (in.getData().getType() != VertexData.VertexType.BIAS) {
+                    in.getData().setOutput(input.get(i++));
+                }
             }
+
             for (VertexPML<VertexData> in : inputVertexes) {
                 Float valIn = in.getData().getOutput();
                 for (VertexPML<VertexData> hi : hiddenVertexes) {
-                    hi.getData().incrementSum(valIn * this.g.getValue(in, hi));
+                    if(hi.getData().getType() != VertexData.VertexType.BIAS){
+                        hi.getData().incrementSum(valIn * this.g.getValue(in, hi));
+                    }
                 }
             }
             for (VertexPML<VertexData> hi : hiddenVertexes) {
-                hi.getData().setOutput(SigmoidFunction.compute(hi.getData().getSum()));
+                if(hi.getData().getType() != VertexData.VertexType.BIAS){
+                    hi.getData().setOutput(SigmoidFunction.compute(hi.getData().getSum()));
+                }
             }
             for (VertexPML<VertexData> hi : hiddenVertexes) {
                 this.outputVertexes.getData().incrementSum(hi.getData().getOutput() * this.g.getValue(hi, this.outputVertexes));
@@ -221,7 +267,8 @@ public class PerceptronMultilayer {
                 hi.getData().setDelta(this.outputVertexes.getData().getDelta() * this.g.getValue(hi, this.outputVertexes) * SigmoidFunction.derivative(hi.getData().getSum()));
             }
             updateWeight();
-            return Double.valueOf(0.5 * Math.pow(diff, 2.0)).floatValue();
+//            return Double.valueOf(0.5 * Math.pow(diff, 2.0)).floatValue();
+            return out;
         }
     }
 
@@ -235,8 +282,10 @@ public class PerceptronMultilayer {
         // delta in the hidden layer * Output at the first layer (input if the input layer) * alpha
         for (VertexPML<VertexData> in : inputVertexes) {
             for (VertexPML<VertexData> hi : hiddenVertexes) {
-                Float oldWeight = this.g.getValue(in, hi);
-                this.g.setValue(in, hi, oldWeight + this.alpha * in.getData().getOutput() * hi.getData().getDelta());
+                if(hi.getData().getType() != VertexData.VertexType.BIAS){
+                    Float oldWeight = this.g.getValue(in, hi);
+                    this.g.setValue(in, hi, oldWeight + this.alpha * in.getData().getOutput() * hi.getData().getDelta());
+                }
             }
         }
     }

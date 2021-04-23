@@ -2,6 +2,7 @@ package mg.jaona.ia;
 
 import org.junit.jupiter.api.Test;
 
+import javax.sound.midi.SysexMessage;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,13 +10,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class PerceptronMultilayerTest {
     @Test
     void xorTest(){
-        List<List<Float>> input = List.of(List.of(0f,0f),List.of(1f,1f),List.of(0f,1f),List.of(1f,0f));
-        List<Float> output = List.of(1f, 1f, 0f, 0f);
+        List<List<Float>> input = List.of(List.of(-1f,-1f),List.of(1f,1f),List.of(-1f,1f),List.of(1f,-1f));
+        List<Float> output = List.of(1f, 0f, 1f, 0f);
         PerceptronMultilayer pmc = new PerceptronMultilayer(new PerceptronMultilayer.Structure(2, 2));
         pmc.initializeWeight();
-        pmc.setAlpha(0.001f);
-        for (int i = 0; i < 5000; i++) {
-            pmc.propagateOneValue(input.get(i % 4), output.get(i % 4));
+        pmc.setAlpha(10f);
+        for (int i = 0; i < 1000; i++) {
+            if(true){
+                pmc.propagateOneValue(input.get(i % 4), output.get(i % 4));
+            }else{
+                System.out.println(pmc.propagateOneValue(input.get(i % 4), output.get(i % 4)));
+            }
         }
         boolean[] res = new boolean[4];
         for (int i = 0; i < 4; i++) {
@@ -30,6 +35,8 @@ class PerceptronMultilayerTest {
 
     @Test
     void fit() {
+        System.out.println(SigmoidFunction.compute(1.2f));
+        System.out.println(SigmoidFunction.compute(0.507409908f));
     }
 
     @Test
@@ -47,6 +54,15 @@ class PerceptronMultilayerTest {
 
     @Test
     void feedForward() {
+        var pmc = new PerceptronMultilayer(new PerceptronMultilayer.Structure(2,2));
+        pmc.initializeWeight(0.2f);
+        assertEquals(Float.valueOf(0.6241991f), pmc.feedForward(List.of(2f,3f)));
+        pmc.setAlpha(1f);
+        for (int i = 0; i < 100; i++) {
+            pmc.propagateOneValue(List.of(2f,3f), 0f);
+        }
+        System.out.println(pmc.feedForward(List.of(2f,3f)));
+        System.out.println(pmc.feedForward(List.of(2f,3f)));
 
     }
 
