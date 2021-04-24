@@ -1,8 +1,6 @@
 package mg.jaona.app.serietemporelle.controllers;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,7 +17,6 @@ import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import javafx.util.StringConverter;
 import mg.jaona.app.serietemporelle.SerieTemporelleUI;
-import mg.jaona.ia.NMSE;
 import mg.jaona.ia.PerceptronMultilayer;
 import mg.jaona.ia.SerieTemporelle;
 import mg.jaona.ia.Takens;
@@ -165,6 +162,7 @@ public class SerieTemporelleController implements Initializable {
         choiceStepMode.setOnAction(event ->
                 handlePredictMode(choiceStepMode.getValue())
         );
+        tableValues.setPlaceholder(new Label(""));
     }
 
 
@@ -256,10 +254,11 @@ public class SerieTemporelleController implements Initializable {
 
     @FXML
     private void handleLearn(ActionEvent e) {
+        btnLearn.setDisable(true);
         fitError.getData().clear();
         testError.getData().clear();
         SerieTemporelleController.c = 0;
-        pmc.setAlpha(0.1f);
+        pmc.setAlpha(Float.parseFloat(inputAlpha.getText()));
         CompletableFuture.runAsync(() -> pmc.fit(this.values.stream().map(SerieTemporelle.DataSet::getY).collect(Collectors.toList()),
                 Integer.parseInt(inputMaxEpoch.getText()), 0.2f, value -> Platform.runLater(() -> {
                     fitError
@@ -270,6 +269,7 @@ public class SerieTemporelleController implements Initializable {
                             .add(new XYChart.Data<>(Integer.valueOf(SerieTemporelleController.c).toString(), value.getTest()));
                     SerieTemporelleController.c++;
                 }))).thenRun(() -> {
+            btnLearn.setDisable(false);
             titledPredict.setDisable(false);
             redraw();
         });
