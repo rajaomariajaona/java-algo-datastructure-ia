@@ -21,28 +21,28 @@ public class PerceptronMultilayer {
         this.g = new AdjacencyMatrixGraph<>();
         VertexData vertexData = new VertexData();
         vertexData.setType(VertexData.VertexType.BIAS);
-        VertexPML<VertexData> vertexPML = new VertexPML<VertexData>("bin", vertexData);
+        VertexPML<VertexData> vertexPML = new VertexPML<>("bin", vertexData);
         this.inputVertexes.add(vertexPML);
         this.g.addVertex(vertexPML);
 
         for (int i = 0; i < structure.getNbInputLayer(); i++) {
-            VertexPML<VertexData> v = new VertexPML<VertexData>("i" + i, new VertexData());
+            VertexPML<VertexData> v = new VertexPML<>("i" + i, new VertexData());
             this.inputVertexes.add(v);
             g.addVertex(v);
         }
 
         VertexData vertexData2 = new VertexData();
         vertexData2.setType(VertexData.VertexType.BIAS);
-        VertexPML<VertexData> vertexPML2 = new VertexPML<VertexData>("bhi", vertexData2);
+        VertexPML<VertexData> vertexPML2 = new VertexPML<>("bhi", vertexData2);
         this.hiddenVertexes.add(vertexPML2);
         this.g.addVertex(vertexPML2);
 
         for (int i = 0; i < structure.getNbHiddenLayer(); i++) {
-            VertexPML<VertexData> v = new VertexPML<VertexData>("h" + i, new VertexData());
+            VertexPML<VertexData> v = new VertexPML<>("h" + i, new VertexData());
             this.hiddenVertexes.add(v);
             g.addVertex(v);
         }
-        this.outputVertexes = new VertexPML<VertexData>("o", new VertexData());
+        this.outputVertexes = new VertexPML<>("o", new VertexData());
         g.addVertex(this.outputVertexes);
     }
 
@@ -108,7 +108,7 @@ public class PerceptronMultilayer {
 
     public void fit(List<Float> serie, int epoch, float testRatio, NMSE.NMSECallback callback) {
         List<NMSE> errors = new ArrayList<>();
-
+        int count = 0;
         if (testRatio >= 1 || testRatio < 0) {
             throw new IllegalArgumentException("Test ration is not enough");
         }
@@ -142,22 +142,32 @@ public class PerceptronMultilayer {
             }
             errors.add(NMSE.compute(expectedFit, actualFit, expectedTest, actualTest));
             callback.pass(errors.get(errors.size() - 1));
-            if(errors.get(errors.size() - 1).getFit() - errors.get(errors.size() - 1).getTest() < 0.00001f){
-                for (int i = 0; i < actualFit.size(); i++) {
-                    System.out.println(i + " expected: "+ expectedFit.get(i) + " actual: " + actualFit.get(i));
+            if(errors.size() > 1 && errors.get(errors.size() - 2).getTest() < errors.get(errors.size() - 1).getTest()){
+                count++;
+                if(count > 5){
+                    break;
                 }
-                break;
+            }else{
+                count = 0;
             }
             epoch--;
         }
+        Deque<Float> deque = new ArrayDeque<>(testSerie);
+        while (deque.size() > structure.nbInputLayer) {
+            List<Float> toPropagate = deque.stream().limit(structure.nbInputLayer + 1).collect(Collectors.toList());
+            Float expected = toPropagate.remove(structure.nbInputLayer);
+            Float actual = feedForward(toPropagate);
+            System.out.println("expected: " + expected + " actual: " + actual);
+            deque.removeFirst();
+        }
     }
 
-    public List<Float> predict(List<Float> input, int step) {
+    public List<Float> predictMultipleStep(List<Float> input, int step) {
         List<Float> res = new ArrayList<>();
         Deque<Float> queueInput = new ArrayDeque<>(input);
         if (input.size() != structure.getNbInputLayer()) {
             throw new IllegalArgumentException("Input not correspond to input layer");
-        } else if (step < 1) {
+        } else if (step < 2) {
             throw new IllegalArgumentException("Step invalid");
         } else {
             for (int i = 0; i < step; i++) {
@@ -165,6 +175,21 @@ public class PerceptronMultilayer {
                 res.add(pred);
                 queueInput.removeLast();
                 queueInput.addFirst(pred);
+            }
+        }
+        return res;
+    }
+    public List<Float> predictOneStep(List<Float> input, int number) {
+        List<Float> res = new ArrayList<>();
+        Deque<Float> queueInput = new ArrayDeque<>(input);
+        if (number < 1) {
+            throw new IllegalArgumentException("Step invalid");
+        } else {
+            while (queueInput.size() >= structure.nbInputLayer) {
+                List<Float> toPropagate = queueInput.stream().limit(structure.nbInputLayer).collect(Collectors.toList());
+                Float actual = feedForward(toPropagate);
+                queueInput.removeFirst();
+                res.add(actual);
             }
         }
         return res;

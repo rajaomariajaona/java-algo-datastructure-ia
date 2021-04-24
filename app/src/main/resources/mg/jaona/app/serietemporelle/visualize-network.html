@@ -228,7 +228,12 @@
         d3.selectAll("textPath")
             .style("visibility", "hidden")
     }
-
+    function hideGraph() {
+        d3.select("svg").style("visibility", "hidden")
+    }
+    function showGraph() {
+        d3.select("svg").style("visibility", "visible")
+    }
 
 </script>
 </body>
