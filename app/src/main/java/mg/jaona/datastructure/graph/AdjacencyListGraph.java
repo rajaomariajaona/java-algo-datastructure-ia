@@ -39,12 +39,18 @@ public class AdjacencyListGraph<T extends Vertex, V> implements Graph<T, V> {
      * @param start Start vertex
      * @param end   End vertex
      * @param value The value
+     * @param bidirectional if true add edge bidirectionally
      * @throws IllegalArgumentException if vertex not exist on graph
      */
     @Override
-    public void addEdge(T start, T end, V value) {
+    public void addEdge(T start, T end, V value, boolean bidirectional) {
         if (vertexes.contains(start) && vertexes.contains(end)) {
-            list.get(start).add(new AbstractMap.SimpleEntry<T, V>(end, value));
+            if(bidirectional){
+                list.get(start).add(new AbstractMap.SimpleEntry<T, V>(end, value));
+                list.get(end).add(new AbstractMap.SimpleEntry<T, V>(start, value));
+            }else{
+                list.get(start).add(new AbstractMap.SimpleEntry<T, V>(end, value));
+            }
         } else {
             throw new IllegalArgumentException("Vertex not exist on graph");
         }
@@ -56,10 +62,11 @@ public class AdjacencyListGraph<T extends Vertex, V> implements Graph<T, V> {
      * @param start Start vertex
      * @param end   End vertex
      * @param value The value
+     * @param bidirectional if true set value bidirectionally
      * @throws IllegalArgumentException if Edge don't exist
      */
     @Override
-    public void setValue(T start, T end, V value) {
+    public void setValue(T start, T end, V value, boolean bidirectional) {
         List<Map.Entry<T, V>> edges = list.get(start);
         List<Map.Entry> res = edges.stream().filter(entry -> entry.getKey().equals(end)).limit(1).collect(Collectors.toList());
         if (res.size() == 0) {
@@ -113,6 +120,11 @@ public class AdjacencyListGraph<T extends Vertex, V> implements Graph<T, V> {
     @Override
     public Set<T> getVertexes() {
         return vertexes;
+    }
+
+    @Override
+    public boolean isConnected(T start, T end, boolean bidirectional) {
+        return false;
     }
 
     /**

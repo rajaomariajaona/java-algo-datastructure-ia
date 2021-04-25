@@ -77,6 +77,31 @@ class AdjacencyMatrixGraphTest {
 
     @Test
     void addEdge() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Vertex[] vertexes = new Vertex[]{new Vertex("a"),
+                    new Vertex("b"),
+                    new Vertex("c")};
+            Map<Vertex, List<Map.Entry<Vertex, Integer>>> list = new HashMap<>();
+            for (Vertex e : vertexes) {
+                List<Map.Entry<Vertex, Integer>> edge = new ArrayList<>();
+                for (Vertex f : vertexes) {
+                    edge.add(new AbstractMap.SimpleEntry(f, randInt(0, 40)));
+                }
+                list.put(e, edge);
+            }
+
+            AdjacencyMatrixGraph<Vertex, Integer> g = new AdjacencyMatrixGraph();
+            for (Vertex e : vertexes) {
+                g.addVertex(e);
+            }
+            for (Vertex key : list.keySet()) {
+                for (Map.Entry<Vertex, Integer> target : list.get(key)) {
+                    g.addEdge(key, target.getKey(), target.getValue());
+                }
+            }
+        }, "Bidirectional edge should have the same value");
+
+
         Vertex[] vertexes = new Vertex[]{new Vertex("a"),
                 new Vertex("b"),
                 new Vertex("c")};
@@ -94,7 +119,11 @@ class AdjacencyMatrixGraphTest {
         }
         for (Vertex key : list.keySet()) {
             for (Map.Entry<Vertex, Integer> target : list.get(key)) {
-                g.addEdge(key, target.getKey(), target.getValue());
+                if(g.getValue(target.getKey(), key) == null || g.getValue(target.getKey(), key).equals(g.getNullValue())){
+                    g.addEdge(key, target.getKey(), target.getValue());
+                }else{
+                    g.addEdge(key, target.getKey(), g.getValue(target.getKey(), key));
+                }
             }
         }
         Map<Vertex, Map<Vertex, Integer>> matrix = g.getMatrix();
@@ -217,5 +246,25 @@ class AdjacencyMatrixGraphTest {
                 assertEquals(Integer.valueOf(0), matrix.get(i).get(j), "Default null value is not change on set");
             }
         }
+    }
+    @Test
+    void isConnected(){
+        AdjacencyMatrixGraph<Vertex, Integer> g = new AdjacencyMatrixGraph<>();
+        g.addVertex(new Vertex("a"));
+        g.addVertex(new Vertex("b"));
+
+        assertFalse(g.isConnected(new Vertex("a"), new Vertex("b")));
+        assertFalse(g.isConnected(new Vertex("b"), new Vertex("a")));
+        assertFalse(g.isConnected(new Vertex("b"), new Vertex("a"), true));
+
+        g.addEdge(new Vertex("a"), new Vertex("b"), 10);
+        assertTrue(g.isConnected(new Vertex("a"), new Vertex("b")));
+        assertFalse(g.isConnected(new Vertex("b"), new Vertex("a")));
+        assertFalse(g.isConnected(new Vertex("b"), new Vertex("a"), true));
+
+        g.addEdge(new Vertex("b"), new Vertex("a"), 10);
+        assertTrue(g.isConnected(new Vertex("a"), new Vertex("b")));
+        assertTrue(g.isConnected(new Vertex("b"), new Vertex("a")));
+        assertTrue(g.isConnected(new Vertex("b"), new Vertex("a"), true));
     }
 }

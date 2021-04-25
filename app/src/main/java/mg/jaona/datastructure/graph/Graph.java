@@ -1,5 +1,6 @@
 package mg.jaona.datastructure.graph;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -13,6 +14,15 @@ public interface Graph<T extends Vertex, V> {
     void addVertex(T v);
 
     /**
+     * @param vs add Vertices inside Graph
+     */
+    default void addVertices(List<T> vs){
+        for (T v: vs) {
+            addVertex(v);
+        }
+    }
+
+    /**
      * @param v delete Vertex inside Graph and all links
      */
     void deleteVertex(T v);
@@ -24,7 +34,29 @@ public interface Graph<T extends Vertex, V> {
      * @param end   End vertex
      * @param value The value
      */
-    void addEdge(T start, T end, V value);
+    default void addEdge(T start, T end, V value){
+        this.addEdge(start, end, value, false);
+    }
+
+    /**
+     * Add Edge into graph and set his value
+     *
+     * @param start Start vertex
+     * @param end   End vertex
+     * @param value The value
+     * @param bidirectional if true add edge bidirectionally
+     */
+    void addEdge(T start, T end, V value, boolean bidirectional);
+
+    /**
+     * Set value on Edge
+     *
+     * @param start Start vertex
+     * @param end   End vertex
+     * @param value The value
+     * @param bidirectional if true set value bidirectionally
+     */
+    void setValue(T start, T end, V value, boolean bidirectional);
 
     /**
      * Set value on Edge
@@ -33,7 +65,9 @@ public interface Graph<T extends Vertex, V> {
      * @param end   End vertex
      * @param value The value
      */
-    void setValue(T start, T end, V value);
+    default void setValue(T start, T end, V value){
+        setValue(start, end, value, false);
+    }
 
     /**
      * Set value on Edge
@@ -57,4 +91,10 @@ public interface Graph<T extends Vertex, V> {
      * @return all Vertexes
      */
     Set<T> getVertexes();
+
+    boolean isConnected(T start, T end, boolean bidirectional);
+    default boolean isConnected(T start, T end){
+        return isConnected(start, end, false);
+    }
+
 }
