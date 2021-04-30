@@ -4,9 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-import mg.jaona.app.graph.controllers.GraphController;
 
 import java.io.IOException;
 

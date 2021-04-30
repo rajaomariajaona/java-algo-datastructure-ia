@@ -107,7 +107,7 @@ public class SerieTemporelleController implements Initializable {
                 inputNbHiddenLayer.setText(oldValue);
             }
             txtNbLayerHidden.setText(inputNbHiddenLayer.getText().equals("") ? "0" : inputNbHiddenLayer.getText());
-            btnComputeStructure.setDisable(inputNbHiddenLayer.getText().trim().equals(""));
+            btnComputeStructure.setDisable(inputNbHiddenLayer.getText().trim().equals("") || Integer.parseInt(inputNbHiddenLayer.getText()) == 0);
         });
 
         inputAlpha.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -178,6 +178,7 @@ public class SerieTemporelleController implements Initializable {
         tableValues.setItems(observableList);
         btnInitWeight.setDisable(true);
         hideGraph();
+        this.inputNbHiddenLayer.setText("");
     }
 
     @FXML
@@ -201,8 +202,8 @@ public class SerieTemporelleController implements Initializable {
                 titledLearn.setDisable(true);
                 fitError.getData().clear();
                 testError.getData().clear();
-                btnInitWeight.setDisable(false);
             }
+            btnInitWeight.setDisable(false);
         } catch (Exception e) {
             e.printStackTrace();
         }
