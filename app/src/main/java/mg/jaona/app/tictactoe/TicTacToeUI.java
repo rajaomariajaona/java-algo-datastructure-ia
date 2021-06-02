@@ -24,6 +24,8 @@ public class TicTacToeUI extends Application {
         TicTacToeController ctrl = loader.getController();
         Scene scene = new Scene(root);
         stage.setScene(scene);
+        stage.setHeight(400);
+        stage.setWidth(600);
         stage.setResizable(false);
         stage.setTitle("Tic Tac Toe");
         stage.show();

@@ -9,6 +9,20 @@ public class Matrix {
         // Clone array to avoid passing by reference
         this.data = Arrays.stream(data).map(float[]::clone).toArray(float[][]::new);
     }
+    public Matrix(MatrixSize size, float value){
+       this.data = new float[size.getRow()][size.getCol()];
+        for (int i = 0; i < size.getRow(); i++) {
+            Arrays.fill(this.data[i], value);
+        }
+    }
+    public void clear(){
+        this.clear(0);
+    }
+    public void clear(float value){
+        for (int i = 0; i < this.getSize().getRow(); i++) {
+            Arrays.fill(this.data[i], value);
+        }
+    }
     public Matrix(Matrix m){
         this.data = Arrays.stream(m.getData()).map(float[]::clone).toArray(float[][]::new);
     }
