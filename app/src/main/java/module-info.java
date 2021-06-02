@@ -12,6 +12,8 @@ module Algo.Data.Structure.IA.app {
     opens mg.jaona.app.graph.controllers to javafx.fxml;
     opens mg.jaona.app.serietemporelle to javafx.graphics, javafx.fxml;
     opens mg.jaona.app.serietemporelle.controllers to javafx.fxml;
+    opens mg.jaona.app.tictactoe to javafx.graphics, javafx.fxml;
+    opens mg.jaona.app.tictactoe.controllers to javafx.fxml;
     opens mg.jaona.ia to javafx.base;
     exports mg.jaona;
 }
