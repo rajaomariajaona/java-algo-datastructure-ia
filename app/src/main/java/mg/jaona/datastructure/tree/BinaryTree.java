@@ -1,10 +1,10 @@
 package mg.jaona.datastructure.tree;
 
-public class BinaryTreeNode<T>{
+public class BinaryTree<T> implements TreeNode{
     T value;
-    BinaryTreeNode<T> left, right;
+    BinaryTree<T> left, right;
 
-    public BinaryTreeNode(T value) {
+    public BinaryTree(T value) {
         this.value = value;
         this.left = this.right = null;
     }
