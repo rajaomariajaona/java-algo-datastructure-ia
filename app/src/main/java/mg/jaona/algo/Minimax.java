@@ -12,12 +12,12 @@ public class Minimax {
         MAXIMIZER
     }
     @FunctionalInterface
-    public interface HeuristiqueFunction {
-        double compute(double value);
+    public interface HeuristiqueFunction<T>{
+        Double compute(T value);
     }
-    public static Double minimax(Tree<Double> n, Player p){
+    public static <T> Double minimax(Tree<T> n, Player p, HeuristiqueFunction<T> f){
         if(n.getChildren().isEmpty()){
-            return n.getValue();
+            return f.compute(n.getValue());
         }
         if(p.equals(Player.MAXIMIZER)){
             // choix max en noeuds terminal
@@ -26,13 +26,13 @@ public class Minimax {
             // De alaina amzay ny max choix min + node actuelle
             var res = n.getChildren()
                     .stream()
-                    .mapToDouble(doubleTree -> minimax(doubleTree, Player.MINIMIZER))
+                    .mapToDouble(doubleTree -> minimax(doubleTree, Player.MINIMIZER,f))
                     .max();
             return res.isPresent() ? res.getAsDouble() : 0.0;
         }else{
             var res = n.getChildren()
                     .stream()
-                    .mapToDouble(doubleTree -> minimax(doubleTree, Player.MAXIMIZER))
+                    .mapToDouble(doubleTree -> minimax(doubleTree, Player.MAXIMIZER,f))
                     .min();
             return res.isPresent() ? res.getAsDouble() : 0.0;
         }

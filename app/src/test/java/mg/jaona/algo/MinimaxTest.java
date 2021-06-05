@@ -18,6 +18,6 @@ class MinimaxTest {
         lr.addChildren(new Tree(2.0));
         right.addChildren(new Tree(-3.0));
         right.addChildren(new Tree(3.0));
-        assertEquals(Double.valueOf(-2.0), Minimax.minimax(t, Minimax.Player.MAXIMIZER));
+        assertEquals(Double.valueOf(-2.0), Minimax.minimax(t, Minimax.Player.MAXIMIZER, value -> value));
     }
 }
