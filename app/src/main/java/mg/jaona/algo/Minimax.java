@@ -1,5 +1,6 @@
 package mg.jaona.algo;
 
+import mg.jaona.datastructure.matrix.Matrix;
 import mg.jaona.datastructure.tree.Tree;
 
 import java.util.ArrayList;
@@ -7,17 +8,22 @@ import java.util.List;
 import java.util.Optional;
 
 public class Minimax {
+
     public enum Player {
         MINIMIZER,
         MAXIMIZER
     }
     @FunctionalInterface
     public interface HeuristiqueFunction<T>{
-        Double compute(T value);
+        Double compute(Tree<T> value, Player player);
     }
-    public static <T> Double minimax(Tree<T> n, Player p, HeuristiqueFunction<T> f){
-        if(n.getChildren().isEmpty()){
-            return f.compute(n.getValue());
+    @FunctionalInterface
+    public interface IsTerminalNodeFunction<T>{
+        boolean check(Tree<T> value);
+    }
+    public static <T> Double minimax(Tree<T> n, Player p, HeuristiqueFunction<T> f, IsTerminalNodeFunction<T> isTerminalNodeFunction){
+        if(n.getChildren().isEmpty() || isTerminalNodeFunction.check(n)){
+            return f.compute(n, p);
         }
         if(p.equals(Player.MAXIMIZER)){
             // choix max en noeuds terminal
@@ -36,6 +42,9 @@ public class Minimax {
                     .min();
             return res.isPresent() ? res.getAsDouble() : 0.0;
         }
+    }
+    public static <T> Double minimax(Tree<T> n, Player p, HeuristiqueFunction<T> f){
+        return minimax(n,p,f, value -> false);
     }
 }
 
