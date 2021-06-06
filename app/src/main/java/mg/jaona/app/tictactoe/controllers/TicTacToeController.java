@@ -1,5 +1,6 @@
 package mg.jaona.app.tictactoe.controllers;
 
+import com.gluonhq.charm.glisten.control.Dialog;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -96,7 +97,7 @@ public class TicTacToeController implements Initializable {
             checkFinished();
             if (!this.isFinished) {
                 getAIResponse();
-                checkFinished();
+                checkFinished(true);
             }
             System.out.printf("Mouse entered cell [%d, %d]%n", colIndex.intValue(), rowIndex.intValue());
         }
@@ -107,12 +108,42 @@ public class TicTacToeController implements Initializable {
         this.currentTurn = this.currentTurn == -1 ? 1 : -1;
         this.synchronise();
     }
-
-    private void checkFinished() {
+    private void checkFinished(){
+        checkFinished(false);
+    }
+    private void checkFinished(boolean isIa) {
         if (!TicTacToeGame.hasMove(this.matrix)) {
             this.isFinished = true;
             Minimax.Player winner = TicTacToeGame.someoneWon(this.matrix);
             if (winner != null) {
+                Dialog dialog = new Dialog();
+                dialog.setTitle(new Label("Fin de la partie"));
+                String msg = "";
+                char id = winner.equals(Minimax.Player.MINIMIZER) ? 'O' : 'X';
+                if(isIa){
+                    msg += "L' IA (" + id +  ") a ";
+                }else{
+                    msg += "Vous (" + id +  ") avez ";
+                }
+                msg += "gagné";
+                dialog.setContent(new Label(msg));
+                Button okButton = new Button("OK");
+                okButton.setOnAction(e -> {
+                    dialog.hide();
+                });
+                dialog.getButtons().add(okButton);
+                dialog.showAndWait();
+                System.out.println(winner.toString());
+            }else {
+                Dialog dialog = new Dialog();
+                dialog.setTitle(new Label("Fin de la partie"));
+                dialog.setContent(new Label("Match Null"));
+                Button okButton = new Button("OK");
+                okButton.setOnAction(e -> {
+                    dialog.hide();
+                });
+                dialog.getButtons().add(okButton);
+                dialog.showAndWait();
                 System.out.println(winner.toString());
             }
         }
