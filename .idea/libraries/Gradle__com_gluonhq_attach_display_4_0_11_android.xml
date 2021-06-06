@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.gluonhq.attach:display:4.0.11:android">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq.attach/display/4.0.11/9d405678f74a4e6c7fb3b5d1d6cb3322c137216e/display-4.0.11-android.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq.attach/display/4.0.11/f504b468f3adc7f1a522eccc03c63ee1b79f492b/display-4.0.11-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

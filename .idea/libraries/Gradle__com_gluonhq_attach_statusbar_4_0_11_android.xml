@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.gluonhq.attach:statusbar:4.0.11:android">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq.attach/statusbar/4.0.11/fea6aade578e62d9a4a0fc62d8ca10b623a517b9/statusbar-4.0.11-android.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq.attach/statusbar/4.0.11/ad5f824be78e75cb701b04972a35d2690f284577/statusbar-4.0.11-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
