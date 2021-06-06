@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.gluonhq.attach:lifecycle:4.0.11">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq.attach/lifecycle/4.0.11/58cf41fec18e724a868d80fff713e23798ecc3ae/lifecycle-4.0.11.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq.attach/lifecycle/4.0.11/37877c86fce41fb4071e46b382bdb6fe757fc891/lifecycle-4.0.11-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
