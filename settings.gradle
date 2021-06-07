@@ -9,3 +9,5 @@
 rootProject.name = 'Algo Data Structure IA'
 include ':android'
 include ':desktop'
+include ':library'
+
