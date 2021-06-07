@@ -1,0 +1,23 @@
+@startuml
+class Vertex{
+    - label: String
+}
+interface Graph<T>{
+    + addVertex(Vertex v) : void
+    + deleteVertex(Vertex v) : void
+    + addEdge(Vertex v1, Vertex v2, T value) : void
+    + setValue(Vertex v1, Vertex v2, T value) : void
+    + getValue(Vertex v1, Vertex v2)
+    + deleteEdge(Vertex v1, Vertex v2) : void
+    + getVertexes(): List<Vertex>
+}
+
+class AdjacencyListGraph{
+    - List<Vertex, Map<Vertex,T>>
+}
+class AdjacencyMatrixGraph{
+    - Map<Vertex,Map<Vertex, T>>
+}
+Graph <|-- AdjacencyMatrixGraph
+Graph <|-- AdjacencyListGraph
+@enduml

@@ -3,7 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Algo_Data_Structure_IA.iml" filepath="$PROJECT_DIR$/.idea/modules/Algo_Data_Structure_IA.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Algo_Data_Structure_IA.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Algo_Data_Structure_IA.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/android/Algo_Data_Structure_IA.android.iml" filepath="$PROJECT_DIR$/.idea/modules/android/Algo_Data_Structure_IA.android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Algo_Data_Structure_IA.desktop/Algo_Data_Structure_IA.desktop.iml" filepath="$PROJECT_DIR$/.idea/modules/Algo_Data_Structure_IA.desktop/Algo_Data_Structure_IA.desktop.iml" />
     </modules>
   </component>
 </project>

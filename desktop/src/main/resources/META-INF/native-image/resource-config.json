@@ -1,0 +1,5 @@
+{
+  "resources":{
+  "includes":[{"pattern":"\\Qmg/jaona/app/tictactoe/tictactoe.fxml\\E"}]},
+  "bundles":[{"name":"com.sun.javafx.tk.quantum.QuantumMessagesBundle"}]
+}

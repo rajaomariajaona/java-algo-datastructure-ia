@@ -1,0 +1,22 @@
+@startuml
+
+interface BaseTree {
+    Vertex root
+}
+
+class TreeNode<T> {
+    T value
+    TreeNode<T> children
+}
+
+class BinaryTreeNode<T> {
+    T value
+    BinaryTreeNode left;
+    BinaryTreeNode right;
+}
+
+class BinaryTree{
+    BinaryTreeNode root
+}
+
+@enduml

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            overflow: hidden;
+            /*background: aquamarine;*/
+            padding: 0;
+        }
+
+        #svg-container {
+            height: 100vh;
+            width: 100vw;
+            /*background: antiquewhite;*/
+        }
+    </style>
+</head>
+
+<body>
+<div id="svg-container">
+    <svg id="graph"></svg>
+</div>
+<script src="d3.v6.min.js"></script>
+<script>
+    var h, w;
+    h = window.innerHeight;
+    w = window.innerWidth;
+    const color = d3.scaleOrdinal(d3.schemeCategory10)
+    // var network = {
+    //     nodes: [{id: 'i0', nr: 1, layer: 1}, {id: 'i1', nr: 2, layer: 1}, {id: 'h0', nr: 1, layer: 2}, {
+    //         id: 'h1',
+    //         nr: 2,
+    //         layer: 2
+    //     }, {id: 'h2', nr: 3, layer: 2}, {id: 'h3', nr: 4, layer: 2}, {id: 'h4', nr: 5, layer: 2}, {
+    //         id: 'h5',
+    //         nr: 6,
+    //         layer: 2
+    //     }, {id: 'h6', nr: 7, layer: 2}, {id: 'h7', nr: 8, layer: 2}, {id: 'h8', nr: 9, layer: 2}, {
+    //         id: 'h9',
+    //         nr: 10,
+    //         layer: 2
+    //     }, {id: 'h10', nr: 11, layer: 2}, {id: 'h11', nr: 12, layer: 2}, {id: 'o', nr: 1, layer: 3},],
+    //     edges: [{source: 'i0', target: 'h0', weight: '0'}, {source: 'i0', target: 'h1', weight: '0'}, {
+    //         source: 'i0',
+    //         target: 'h2',
+    //         weight: '0'
+    //     }, {source: 'i0', target: 'h3', weight: '0'}, {source: 'i0', target: 'h4', weight: '0'}, {
+    //         source: 'i0',
+    //         target: 'h5',
+    //         weight: '0'
+    //     }, {source: 'i0', target: 'h6', weight: '0'}, {source: 'i0', target: 'h7', weight: '0'}, {
+    //         source: 'i0',
+    //         target: 'h8',
+    //         weight: '0'
+    //     }, {source: 'i0', target: 'h9', weight: '0'}, {source: 'i0', target: 'h10', weight: '0'}, {
+    //         source: 'i0',
+    //         target: 'h11',
+    //         weight: '0'
+    //     }, {source: 'i1', target: 'h0', weight: '0'}, {source: 'i1', target: 'h1', weight: '0'}, {
+    //         source: 'i1',
+    //         target: 'h2',
+    //         weight: '0'
+    //     }, {source: 'i1', target: 'h3', weight: '0'}, {source: 'i1', target: 'h4', weight: '0'}, {
+    //         source: 'i1',
+    //         target: 'h5',
+    //         weight: '0'
+    //     }, {source: 'i1', target: 'h6', weight: '0'}, {source: 'i1', target: 'h7', weight: '0'}, {
+    //         source: 'i1',
+    //         target: 'h8',
+    //         weight: '0'
+    //     }, {source: 'i1', target: 'h9', weight: '0'}, {source: 'i1', target: 'h10', weight: '0'}, {
+    //         source: 'i1',
+    //         target: 'h11',
+    //         weight: '0'
+    //     }, {source: 'h0', target: 'o', weight: '0'}, {source: 'h1', target: 'o', weight: '0'}, {
+    //         source: 'h2',
+    //         target: 'o',
+    //         weight: '0'
+    //     }, {source: 'h3', target: 'o', weight: '0'}, {source: 'h4', target: 'o', weight: '0'}, {
+    //         source: 'h5',
+    //         target: 'o',
+    //         weight: '0'
+    //     }, {source: 'h6', target: 'o', weight: '0'}, {source: 'h7', target: 'o', weight: '0'}, {
+    //         source: 'h8',
+    //         target: 'o',
+    //         weight: '0'
+    //     }, {source: 'h9', target: 'o', weight: '0'}, {source: 'h10', target: 'o', weight: '0'}, {
+    //         source: 'h11',
+    //         target: 'o',
+    //         weight: '0'
+    //     },]
+    // };
+    // draw(network)
+
+    function draw(network, width = w, height = h, thickness = 1.5) {
+        h = window.innerHeight;
+        w = window.innerWidth;
+        d3.select("svg").attr("viewBox", [0, 0, w, h]).select("g").remove();
+
+        const svg = d3.select("svg")
+            .classed('chart', true)
+            .append("g");
+        let pos = layout(network, width, height)
+
+        var link = svg
+            .selectAll(".line")
+            .data(network.edges)
+            .enter()
+            .append("path")
+            .attr("d", d => `M ${pos(d.source).x} ${pos(d.source).y} L ${pos(d.target).x} ${pos(d.target).y}`)
+            .attr("stroke-width", 3)
+            .attr("stroke", d => "#999")
+            .attr("id", d => d.source + "-" + d.target)
+        var weight = svg
+            .selectAll(".weight")
+            .data(network.edges)
+            .enter()
+            .append("text")
+            .append("textPath")
+            .style("visibility", "visible")
+            .text(d => d.weight)
+            .attr("xlink:href", d => "#" + d.source + "-" + d.target)
+            .attr("id", d => "text-" + d.source + "-" + d.target)
+            .attr("text-anchor", "middle")
+            .attr("startOffset", "50%")
+
+        var node = svg
+            .selectAll(".node")
+            .data(network.nodes)
+            .enter().append("circle")
+            .attr("id", (d => `n-${d.layer}-${d.id}`))
+            .attr("cx", d => pos(d.id).x)
+            .attr("cy", d => pos(d.id).y)
+            .attr("r", 25)
+            .attr("stroke", "black")
+            .attr("stroke-width", 2)
+            .attr("fill", d => color(d.layer));
+        var zoomEvent = d3.zoom().on("zoom", (e) => {
+            svg.attr("transform", e.transform)
+        })
+        d3.select("svg").call(zoomEvent)
+
+        let isHidden = d3.select("textPath").style("visibility") == "hidden";
+        node.on('mouseover', function (e, data) {
+            isHidden = d3.select("textPath").style("visibility") == "hidden";
+            hideWeight();
+            link.attr('opacity', .3)
+                .attr("stroke-opacity", 0.3)
+
+            d3.select(this)
+                .attr('opacity', '1')
+                .attr("id", "node-active");
+            console.log(data)
+            const activeLink = link
+                .filter(e => e.source == data.id || e.target == data.id)
+                .attr("stroke-opacity", 1)
+                .attr("opacity", 1)
+                .attr("stroke-width", 3)
+            link
+                .filter(e => e.source == data.id || e.target == data.id)
+                .each(d => {
+                    d3.select("textPath#text-" + d.source + "-" + d.target)
+                        .style("visibility", "visible");
+                })
+        });
+        node.on('mouseout', function (d, i) {
+            link.attr('opacity', '1')
+                .attr("stroke-opacity", 1)
+                .attr("stroke-width", 3)
+                .classed("active", false)
+            const top = d3.select("g#top-container")
+            if (top) {
+                top.remove()
+            }
+            if (isHidden) {
+                hideWeight();
+            } else {
+                showWeight();
+            }
+        });
+    }
+
+    window.onresize = () => {
+        h = window.innerHeight;
+        w = window.innerWidth;
+        var svg = d3.select("svg").attr("viewBox", [0, 0, w, h]);
+        if (network) {
+            const hide = d3.select("textPath").style("visibility") == "hidden";
+            draw(network)
+            if (!hide) {
+                showWeight();
+            }
+        }
+    }
+
+    function layout(net, width, height, margin = 50) {
+        // Determine the layer sizes
+        let lsz = net.nodes.reduce((a, i) => {
+            a[i.layer] = a[i.layer] ? a[i.layer] + 1 : 1;
+            return a
+        }, {})
+        // Set the horizontal scaler
+        let horz = d3.scaleLinear()
+            .domain([Math.min(...net.nodes.map(n => n.layer)), Math.max(...net.nodes.map(n => n.layer))])
+            .range([margin, width - margin]);
+        const pos = (id) => {
+            const node = net.nodes.find(e => e.id == id);
+            return {
+                x: horz(node.layer),
+                y: d3.scaleLinear().domain([0, lsz[node.layer] + 1]).range([0, height])(node.nr)
+            }
+        }
+
+        return pos
+    }
+
+    function showWeight() {
+        d3.selectAll("textPath")
+            .style("visibility", "visible")
+    }
+
+    function hideWeight() {
+        d3.selectAll("textPath")
+            .style("visibility", "hidden")
+    }
+    function hideGraph() {
+        d3.select("svg").style("visibility", "hidden")
+    }
+    function showGraph() {
+        d3.select("svg").style("visibility", "visible")
+    }
+
+</script>
+</body>
+
+</html>
