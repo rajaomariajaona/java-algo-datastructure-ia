@@ -6,6 +6,7 @@ module Algo.Data.Structure.IA.desktop {
     requires java.logging;
     requires java.base;
     requires jdk.jsobject;
+    requires Algo.Data.Structure.IA.library;
 
     opens mg.jaona to javafx.fxml;
     opens mg.jaona.app.graph to javafx.graphics, javafx.fxml;
@@ -14,6 +15,5 @@ module Algo.Data.Structure.IA.desktop {
     opens mg.jaona.app.serietemporelle.controllers to javafx.fxml;
     opens mg.jaona.app.tictactoe to javafx.graphics, javafx.fxml;
     opens mg.jaona.app.tictactoe.controllers to javafx.fxml;
-    opens mg.jaona.ia to javafx.base;
     exports mg.jaona;
 }

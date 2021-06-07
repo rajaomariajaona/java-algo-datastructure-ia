@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -114,35 +115,26 @@ public class TicTacToeController implements Initializable {
             this.isFinished = true;
             Minimax.Player winner = TicTacToeGame.someoneWon(this.matrix);
             if (winner != null) {
-//                Dialog dialog = new Dialog();
-//                dialog.setTitle(new Label("Fin de la partie"));
-//                String msg = "";
-//                char id = winner.equals(Minimax.Player.MINIMIZER) ? 'O' : 'X';
-//                if(isIa){
-//                    msg += "L' IA (" + id +  ") a ";
-//                }else{
-//                    msg += "Vous (" + id +  ") avez ";
-//                }
-//                msg += "gagné";
-//                dialog.setContent(new Label(msg));
-//                Button okButton = new Button("OK");
-//                okButton.setOnAction(e -> {
-//                    dialog.hide();
-//                });
-//                dialog.getButtons().add(okButton);
-//                dialog.showAndWait();
+                String msg = "";
+                char id = winner.equals(Minimax.Player.MINIMIZER) ? 'O' : 'X';
+                if(isIa){
+                    msg += "L' IA (" + id +  ") a ";
+                }else{
+                    msg += "Vous (" + id +  ") avez ";
+                }
+                msg += "gagné";
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setHeaderText(null);
+                alert.setTitle("Fin de la partie");
+                alert.setContentText(msg);
+                alert.showAndWait();
                 System.out.println(winner.toString());
             }else {
-//                Dialog dialog = new Dialog();
-//                dialog.setTitle(new Label("Fin de la partie"));
-//                dialog.setContent(new Label("Match Null"));
-//                Button okButton = new Button("OK");
-//                okButton.setOnAction(e -> {
-//                    dialog.hide();
-//                });
-//                dialog.getButtons().add(okButton);
-//                dialog.showAndWait();
-                System.out.println(winner.toString());
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setHeaderText(null);
+                alert.setTitle("Fin de la partie");
+                alert.setContentText("Match Null");
+                alert.showAndWait();
             }
         }
     }

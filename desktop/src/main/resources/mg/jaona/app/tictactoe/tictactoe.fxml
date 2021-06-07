@@ -26,7 +26,7 @@
    <bottom>
       <VBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
-            <Button alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#handleReset" prefHeight="33.0" prefWidth="124.0" text="Reset" textFill="WHITE">
+            <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleReset" prefHeight="33.0" prefWidth="124.0" text="Reset" textAlignment="CENTER">
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </VBox.margin>
